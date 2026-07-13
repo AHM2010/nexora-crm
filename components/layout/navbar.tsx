@@ -28,11 +28,14 @@ const iconButtonClass =
 export function Navbar({ isMobileMenuOpen, onMobileMenuToggle }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, isReady } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
   const pageTitle =
     navigationItems.find((item) => pathname.startsWith(item.href))?.label ??
     "Dashboard";
+
+  const profileName = isReady ? (user?.name ?? "Ahmed Ashraf") : "";
+  const profileEmail = isReady ? (user?.email ?? "admin@nexora.com") : "";
 
   function handleLogout() {
     logout();
@@ -114,16 +117,14 @@ export function Navbar({ isMobileMenuOpen, onMobileMenuToggle }: NavbarProps) {
               />
             }
           >
-            <UserAvatar name={user?.name ?? "Ahmed Ashraf"} />
+            <UserAvatar name={profileName || "A"} />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuGroup>
               <DropdownMenuLabel>
-                <span className="block truncate">
-                  {user?.name ?? "Ahmed Ashraf"}
-                </span>
+                <span className="block truncate">{profileName}</span>
                 <span className="block truncate text-xs font-normal text-muted-foreground">
-                  {user?.email ?? "admin@nexora.com"}
+                  {profileEmail}
                 </span>
               </DropdownMenuLabel>
             </DropdownMenuGroup>

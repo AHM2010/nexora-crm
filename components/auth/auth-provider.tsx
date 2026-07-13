@@ -35,6 +35,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 const listeners = new Set<() => void>();
 let cachedUser: AuthUser | null | undefined;
 let cachedExpiresAt: number | null = null;
+let hasInitializedAuth = false;
 
 type StoredAuthSession = {
   user: AuthUser;
@@ -54,7 +55,13 @@ function readStoredUser(): AuthUser | null {
   try {
     const session = JSON.parse(stored) as Partial<StoredAuthSession>;
     const user = session.user;
-    if (!user || typeof user.name !== "string" || typeof user.email !== "string" || typeof session.expiresAt !== "number" || session.expiresAt <= Date.now()) {
+    if (
+      !user ||
+      typeof user.name !== "string" ||
+      typeof user.email !== "string" ||
+      typeof session.expiresAt !== "number" ||
+      session.expiresAt <= Date.now()
+    ) {
       clearStoredSession();
       return null;
     }
@@ -71,15 +78,30 @@ function clearStoredSession() {
   sessionStorage.removeItem(AUTH_STORAGE_KEY);
   document.cookie = `${AUTH_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
   cachedExpiresAt = null;
+  hasInitializedAuth = true;
 }
 
 function getUserSnapshot() {
-  if (cachedUser === undefined) cachedUser = readStoredUser();
+  if (!hasInitializedAuth) {
+    cachedUser = readStoredUser();
+    hasInitializedAuth = true;
+  } else if (cachedUser === undefined) {
+    cachedUser = readStoredUser();
+  }
   return cachedUser;
+}
+
+function getAuthReadySnapshot() {
+  if (!hasInitializedAuth) {
+    cachedUser = readStoredUser();
+    hasInitializedAuth = true;
+  }
+  return hasInitializedAuth;
 }
 
 function setAuthUser(user: AuthUser | null) {
   cachedUser = user;
+  hasInitializedAuth = true;
   listeners.forEach((listener) => listener());
 }
 
@@ -87,7 +109,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const user = useSyncExternalStore(subscribe, getUserSnapshot, () => null);
   const isReady = useSyncExternalStore(
     subscribe,
-    () => true,
+    getAuthReadySnapshot,
     () => false,
   );
 
@@ -103,7 +125,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         window.location.replace("/login");
         return;
       }
-      timeout = window.setTimeout(scheduleExpiration, Math.min(remainingTime, 2_147_000_000));
+      timeout = window.setTimeout(
+        scheduleExpiration,
+        Math.min(remainingTime, 2_147_000_000),
+      );
     };
 
     scheduleExpiration();

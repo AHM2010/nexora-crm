@@ -35,7 +35,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
     <Badge
       variant="outline"
       className={cn(
-        "border-transparent capitalize",
+        "border-transparent capitalize transition-colors duration-150 hover:brightness-95 dark:hover:brightness-110",
         statusStyles[status],
         className,
       )}

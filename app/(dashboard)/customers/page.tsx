@@ -1,3 +1,6 @@
+import { CustomerWorkspace } from "@/components/customers/customer-workspace";
+import { customers } from "@/data/customers";
+
 export default function CustomersPage() {
-  return <h1 className="type-page-title">Customers</h1>;
+  return <CustomerWorkspace initialCustomers={customers} />;
 }

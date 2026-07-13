@@ -89,7 +89,7 @@ export function DataTable<T>({
     >
       <Table>
         <caption className="sr-only">{caption}</caption>
-        <TableHeader>
+        <TableHeader className="sticky top-0 z-10 bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/85">
           <TableRow>
             {columns.map((column) => {
               const activeSort =
@@ -164,6 +164,7 @@ export function DataTable<T>({
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
                 onKeyDown={(event) => handleRowKeyDown(event, row)}
                 className={cn(
+                  "odd:bg-muted/20 hover:bg-muted/55",
                   onRowClick &&
                     "cursor-pointer outline-none focus-visible:bg-muted focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                 )}

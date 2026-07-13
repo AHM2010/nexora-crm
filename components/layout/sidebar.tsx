@@ -11,9 +11,9 @@ export type SidebarContentProps = {
 };
 
 export function SidebarContent({ onNavigate }: SidebarContentProps) {
-  const { user } = useAuth();
-  const displayName = user?.name ?? "Ahmed Ashraf";
-  const displayEmail = user?.email ?? "admin@nexora.com";
+  const { user, isReady } = useAuth();
+  const displayName = isReady ? (user?.name ?? "Ahmed Ashraf") : "";
+  const displayEmail = isReady ? (user?.email ?? "admin@nexora.com") : "";
   const initials = displayName
     .split(" ")
     .filter(Boolean)
