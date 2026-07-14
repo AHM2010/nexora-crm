@@ -1,3 +1,6 @@
+import { DealsWorkspace } from "@/components/deals/deals-workspace";
+import { deals } from "@/data/deals";
+
 export default function DealsPage() {
-  return <h1 className="type-page-title">Deals</h1>;
+  return <DealsWorkspace initialDeals={deals} />;
 }

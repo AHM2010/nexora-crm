@@ -11,6 +11,8 @@ export type CrmStatus =
   | "won"
   | "lost"
   | "pending"
+  | "todo"
+  | "in-progress"
   | "completed";
 
 const statusStyles: Record<CrmStatus, string> = {
@@ -25,10 +27,18 @@ const statusStyles: Record<CrmStatus, string> = {
   lost: "bg-destructive/10 text-destructive dark:bg-destructive/20",
   pending:
     "bg-warning/15 text-warning-foreground dark:bg-warning/20 dark:text-warning",
+  todo: "bg-secondary text-secondary-foreground",
+  "in-progress":
+    "bg-warning/15 text-warning-foreground dark:bg-warning/20 dark:text-warning",
   completed: "bg-success/15 text-success dark:bg-success/20",
 };
 
 export type StatusBadgeProps = { status: CrmStatus; className?: string };
+
+const statusLabels: Partial<Record<CrmStatus, string>> = {
+  todo: "To Do",
+  "in-progress": "In Progress",
+};
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   return (
@@ -40,7 +50,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
         className,
       )}
     >
-      {status}
+      {statusLabels[status] ?? status}
     </Badge>
   );
 }

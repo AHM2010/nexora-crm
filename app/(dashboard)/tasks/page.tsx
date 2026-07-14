@@ -1,3 +1,6 @@
+import { TasksWorkspace } from "@/components/tasks/tasks-workspace";
+import { tasks } from "@/data/tasks";
+
 export default function TasksPage() {
-  return <h1 className="type-page-title">Tasks</h1>;
+  return <TasksWorkspace initialTasks={tasks} />;
 }
