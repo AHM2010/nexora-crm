@@ -15,7 +15,7 @@ export const customers: Customer[] = [
   {
     id: "cus_001",
     avatar: "https://i.pravatar.cc/96?img=12",
-    name: "Olivia Martin",
+    name: "Joe Martin",
     company: "Northstar Labs",
     email: "olivia@northstarlabs.com",
     phone: "+1 (415) 555-0132",
