@@ -1,3 +1,7 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Customer } from "@/data/customers";
 import { CustomerActionsDropdown } from "@/components/customers/customer-actions-dropdown";
 import { CustomerAvatar } from "@/components/customers/customer-avatar";
@@ -19,13 +23,15 @@ export function CustomerRow({
   onAction: (message: string) => void;
   onDelete: (customer: Customer) => void;
 }) {
+  const router = useRouter();
+
   return (
     <TableRow className="odd:bg-muted/20 transition-[background-color,opacity] duration-150 hover:bg-muted/55 motion-reduce:transition-none">
       <TableCell className="min-w-56 px-4">
         <div className="flex items-center gap-3">
           <CustomerAvatar name={customer.name} src={customer.avatar} />
           <div>
-            <div className="font-medium text-foreground">{customer.name}</div>
+            <Link href={`/customers/${customer.id}`} className="rounded-sm font-medium text-foreground outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring">{customer.name}</Link>
             <div className="text-xs text-muted-foreground lg:hidden">
               {customer.email}
             </div>
@@ -62,7 +68,7 @@ export function CustomerRow({
       <TableCell className="w-12 text-right">
         <CustomerActionsDropdown
           customer={customer}
-          onView={() => onAction(`Viewing ${customer.name} is a demo action.`)}
+          onView={() => router.push(`/customers/${customer.id}`)}
           onEdit={() => onAction(`Editing ${customer.name} is a demo action.`)}
           onDelete={() => onDelete(customer)}
         />
