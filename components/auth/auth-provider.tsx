@@ -17,29 +17,40 @@ import {
   TEMPORARY_SESSION_SECONDS,
 } from "@/lib/auth/constants";
 
-export type AuthUser = { name: string; email: string };
+export type AuthUser = {
+  name: string;
+  email: string;
+  jobTitle: string;
+  company: string;
+  phone: string;
+  userId?: string;
+};
 export type LoginResult = { success: true } | { success: false; error: string };
 export type AuthContextValue = {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isReady: boolean;
+  lastLoginAt: number | null;
   login: (
     email: string,
     password: string,
     remember: boolean,
   ) => Promise<LoginResult>;
   logout: () => void;
+  updateProfile: (profile: AuthUser) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 const listeners = new Set<() => void>();
 let cachedUser: AuthUser | null | undefined;
 let cachedExpiresAt: number | null = null;
+let cachedLastLoginAt: number | null = null;
 let hasInitializedAuth = false;
 
 type StoredAuthSession = {
   user: AuthUser;
   expiresAt: number;
+  lastLoginAt?: number;
 };
 
 function subscribe(listener: () => void) {
@@ -66,7 +77,16 @@ function readStoredUser(): AuthUser | null {
       return null;
     }
     cachedExpiresAt = session.expiresAt;
-    return { name: user.name, email: user.email };
+    cachedLastLoginAt =
+      typeof session.lastLoginAt === "number" ? session.lastLoginAt : null;
+    return {
+      name: user.name,
+      email: user.email,
+      jobTitle: typeof user.jobTitle === "string" ? user.jobTitle : "",
+      company: typeof user.company === "string" ? user.company : "",
+      phone: typeof user.phone === "string" ? user.phone : "",
+      userId: typeof user.userId === "string" ? user.userId : undefined,
+    };
   } catch {
     clearStoredSession();
     return null;
@@ -78,6 +98,7 @@ function clearStoredSession() {
   sessionStorage.removeItem(AUTH_STORAGE_KEY);
   document.cookie = `${AUTH_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
   cachedExpiresAt = null;
+  cachedLastLoginAt = null;
   hasInitializedAuth = true;
 }
 
@@ -99,8 +120,9 @@ function getAuthReadySnapshot() {
   return hasInitializedAuth;
 }
 
-function setAuthUser(user: AuthUser | null) {
+function setAuthUser(user: AuthUser | null, lastLoginAt: number | null = null) {
   cachedUser = user;
+  cachedLastLoginAt = lastLoginAt;
   hasInitializedAuth = true;
   listeners.forEach((listener) => listener());
 }
@@ -159,13 +181,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const authenticatedUser = {
         name: matchedAccount.name,
         email: matchedAccount.email,
+        jobTitle: matchedAccount.jobTitle,
+        company: matchedAccount.company,
+        phone: matchedAccount.phone,
+        userId: matchedAccount.userId,
       };
       const sessionSeconds = remember
         ? REMEMBERED_SESSION_SECONDS
         : TEMPORARY_SESSION_SECONDS;
+      const lastLoginAt = Date.now();
       const session: StoredAuthSession = {
         user: authenticatedUser,
         expiresAt: Date.now() + sessionSeconds * 1000,
+        lastLoginAt,
       };
       localStorage.removeItem(AUTH_STORAGE_KEY);
       sessionStorage.removeItem(AUTH_STORAGE_KEY);
@@ -175,7 +203,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
       cachedExpiresAt = session.expiresAt;
       document.cookie = `${AUTH_COOKIE_NAME}=${AUTH_COOKIE_VALUE}; path=/; SameSite=Lax; max-age=${sessionSeconds}`;
-      setAuthUser(authenticatedUser);
+      setAuthUser(authenticatedUser, lastLoginAt);
       return { success: true };
     },
     [],
@@ -186,9 +214,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthUser(null);
   }, []);
 
+  const updateProfile = useCallback(async (profile: AuthUser) => {
+    await new Promise((resolve) => setTimeout(resolve, 650));
+    const storage = localStorage.getItem(AUTH_STORAGE_KEY)
+      ? localStorage
+      : sessionStorage;
+    const stored = storage.getItem(AUTH_STORAGE_KEY);
+    if (!stored) throw new Error("No active session");
+    const session = JSON.parse(stored) as StoredAuthSession;
+    storage.setItem(
+      AUTH_STORAGE_KEY,
+      JSON.stringify({
+        ...session,
+        user: { ...profile, userId: profile.userId ?? session.user.userId },
+      }),
+    );
+    setAuthUser(profile, cachedLastLoginAt);
+  }, []);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isAuthenticated: Boolean(user), isReady, login, logout }),
-    [user, isReady, login, logout],
+    () => ({
+      user,
+      isAuthenticated: Boolean(user),
+      isReady,
+      lastLoginAt: cachedLastLoginAt,
+      login,
+      logout,
+      updateProfile,
+    }),
+    [user, isReady, login, logout, updateProfile],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

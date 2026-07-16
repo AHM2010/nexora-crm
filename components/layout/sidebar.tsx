@@ -42,7 +42,7 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
           aria-label="Open user menu"
           className="flex w-full items-center gap-3 rounded-lg p-2 text-left outline-none transition-colors hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring"
         >
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-sidebar-primary text-xs font-semibold text-sidebar-primary-foreground">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-sidebar-primary/90 text-xs font-semibold text-sidebar-primary-foreground shadow-sm ring-1 ring-black/10">
             {initials || "AU"}
           </span>
           <span className="min-w-0 flex-1">
