@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ActivityList } from "@/components/dashboard/activity-list";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -7,6 +8,11 @@ import { TaskWidget } from "@/components/dashboard/task-widget";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { recentActivities } from "@/data/activities";
 import { upcomingTasks } from "@/data/tasks";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "Review customer activity, sales performance, and upcoming work.",
+};
 
 export default function DashboardPage() {
   return (

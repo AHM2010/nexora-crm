@@ -13,9 +13,10 @@ export async function generateMetadata({
   const { id } = await params;
   const customer = getCustomerDetails(id);
   return {
-    title: customer
-      ? `${customer.name} | Nexora CRM`
-      : "Customer not found | Nexora CRM",
+    title: customer ? customer.name : "Customer not found",
+    description: customer
+      ? `View ${customer.name}'s customer profile, activity, and deals.`
+      : "The requested customer could not be found.",
   };
 }
 

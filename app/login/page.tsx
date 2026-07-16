@@ -5,7 +5,7 @@ import { MOCK_ACCOUNTS } from "@/lib/auth/constants";
 import { BrandMark } from "@/components/brand/brand-mark";
 
 export const metadata: Metadata = {
-  title: "Sign in | Nexora CRM",
+  title: "Sign in",
   description: "Sign in to your Nexora CRM workspace.",
 };
 

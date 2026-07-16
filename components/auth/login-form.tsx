@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -105,12 +104,9 @@ export function LoginForm() {
                 <Field data-invalid={fieldState.invalid}>
                   <div className="flex items-center justify-between">
                     <FieldLabel htmlFor="login-password">Password</FieldLabel>
-                    <Link
-                      href="#"
-                      className="text-xs font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
+                    <span className="text-xs font-medium text-muted-foreground">
                       Forgot password?
-                    </Link>
+                    </span>
                   </div>
                   <div className="relative">
                     <Input

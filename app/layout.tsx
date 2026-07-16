@@ -16,8 +16,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nexora CRM",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://nexora-crm.vercel.app",
+  ),
+  title: { default: "Nexora CRM", template: "%s | Nexora CRM" },
   description: "A modern CRM dashboard for customer and revenue operations.",
+  applicationName: "Nexora CRM",
+  openGraph: {
+    type: "website",
+    siteName: "Nexora CRM",
+    title: "Nexora CRM",
+    description: "A modern CRM dashboard for customer and revenue operations.",
+  },
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({
@@ -38,7 +49,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider><TooltipProvider>{children}</TooltipProvider></AuthProvider>
+          <AuthProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
