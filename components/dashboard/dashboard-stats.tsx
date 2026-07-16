@@ -29,7 +29,7 @@ export function DashboardStats() {
           change={stat.change}
           trend={stat.trend}
           description={stat.comparison}
-          className="shadow-sm transition duration-200 motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-md"
+          className="shadow-sm transition duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md"
         />
       ))}
     </section>
