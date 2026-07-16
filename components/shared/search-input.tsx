@@ -43,7 +43,11 @@ export function SearchInput({
         placeholder={placeholder}
         aria-label={label}
         onChange={(event) => onChange(event.target.value)}
-        className={cn("pl-9", canClear && "pr-9", className)}
+        className={cn(
+          "appearance-none pl-9 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden",
+          canClear && "pr-9",
+          className,
+        )}
       />
       {canClear ? (
         <button
