@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SettingsWorkspace } from "@/components/settings/settings-workspace";
 
 export const metadata: Metadata = {
-  title: "Settings | Nexora CRM",
+  title: "Settings",
   description: "Manage your Nexora CRM preferences and account.",
 };
 export default function SettingsPage() {
