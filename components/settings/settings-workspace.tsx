@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import {
   Bell,
   CheckCircle2,
@@ -80,6 +80,7 @@ export function SettingsWorkspace() {
     );
   }, []);
   return (
+    <MotionConfig reducedMotion="user">
     <div className="section-stack">
       <PageHeader
         title="Settings"
@@ -200,5 +201,6 @@ export function SettingsWorkspace() {
         </AnimatePresence>
       </div>
     </div>
+    </MotionConfig>
   );
 }

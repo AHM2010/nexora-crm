@@ -42,7 +42,7 @@ export function CustomerStats({ customer }: { customer: CustomerDetails }) {
         <StatCard
           key={stat.title}
           {...stat}
-          className="transition-[box-shadow,transform] duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md"
+          className="shadow-sm transition duration-200 motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-md"
         />
       ))}
     </section>

@@ -72,7 +72,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser. Demo creden
 
 ## Environment Setup
 
-No environment variables are required for the current demo. Authentication and CRM data are stored locally for interface demonstration purposes.
+No environment variables are required for the current demo. Authentication and CRM data are stored locally for interface demonstration purposes. Set `NEXT_PUBLIC_APP_URL` to the canonical production URL when it differs from the default Vercel URL used by the metadata configuration.
 
 When connecting a production backend:
 
@@ -84,6 +84,7 @@ When connecting a production backend:
 Example:
 
 ```env
+NEXT_PUBLIC_APP_URL=https://crm.example.com
 DATABASE_URL=
 AUTH_SECRET=
 ```

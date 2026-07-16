@@ -233,7 +233,7 @@ export function SecuritySettings({
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium">Chrome on Windows</p>
               <p className="text-xs text-muted-foreground">
-                Riyadh, Saudi Arabia · Current session
+                Medina, Saudi Arabia · Current session
               </p>
             </div>
             <span

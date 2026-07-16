@@ -54,7 +54,7 @@ export function CustomerDealsSection({
             description="New opportunities linked to this customer will appear here."
           />
         ) : (
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             {customer.deals.map((deal) => (
               <CustomerDealCard key={deal.id} deal={deal} />
             ))}
