@@ -81,7 +81,7 @@ export function SettingsWorkspace() {
   }, []);
   return (
     <MotionConfig reducedMotion="user">
-    <div className="section-stack">
+      <div className="section-stack">
       <PageHeader
         title="Settings"
         description="Manage your profile, preferences, security, and account details."
@@ -89,7 +89,7 @@ export function SettingsWorkspace() {
       <div className="grid items-start gap-6 lg:grid-cols-[210px_minmax(0,1fr)]">
         <nav
           aria-label="Settings sections"
-          className="sticky top-20 z-10 -mx-6 overflow-x-auto border-y bg-background/95 px-6 py-2 backdrop-blur lg:mx-0 lg:rounded-xl lg:border lg:p-2"
+          className="sticky top-16 z-10 -mx-6 overflow-x-auto border-y bg-background/95 px-6 py-2 backdrop-blur lg:top-20 lg:mx-0 lg:rounded-xl lg:border lg:p-2"
         >
           <div className="flex min-w-max gap-1 lg:min-w-0 lg:flex-col">
             {sections.map(({ id, label, icon: Icon }) => (
@@ -200,7 +200,7 @@ export function SettingsWorkspace() {
           ))}
         </AnimatePresence>
       </div>
-    </div>
+      </div>
     </MotionConfig>
   );
 }
