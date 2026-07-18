@@ -1,4 +1,7 @@
-import { Building2, CalendarDays } from "lucide-react";
+import { Building2, CalendarDays, GripVertical } from "lucide-react";
+import { memo } from "react";
+import type { DraggableAttributes } from "@dnd-kit/core";
+import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import type { Deal, DealStage } from "@/data/deals";
 import { PriorityBadge } from "@/components/shared/priority-badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
@@ -25,12 +28,18 @@ const date = new Intl.DateTimeFormat("en-US", {
   timeZone: "UTC",
 });
 
-export function DealCard({
+export const DealCard = memo(function DealCard({
   deal,
   onOpen,
+  dragAttributes,
+  dragListeners,
+  isDragging = false,
 }: {
   deal: Deal;
   onOpen: (deal: Deal) => void;
+  dragAttributes?: DraggableAttributes;
+  dragListeners?: SyntheticListenerMap;
+  isDragging?: boolean;
 }) {
   return (
     <button
@@ -39,6 +48,7 @@ export function DealCard({
       className={cn(
         "group w-full rounded-xl border border-l-4 bg-card p-4 text-left shadow-xs outline-none transition duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring",
         stageBorder[deal.stage],
+        isDragging && "opacity-40 shadow-none",
       )}
       aria-label={`Open ${deal.title} deal`}
     >
@@ -58,10 +68,20 @@ export function DealCard({
             </p>
           </div>
         </div>
-        <PriorityBadge
-          priority={deal.priority}
-          className="shrink-0 text-[10px]"
-        />
+        <div className="flex shrink-0 items-center gap-1">
+          <PriorityBadge priority={deal.priority} className="text-[10px]" />
+          {dragAttributes ? (
+            <span
+              {...dragAttributes}
+              {...dragListeners}
+              className="touch-none cursor-grab rounded-md p-1 text-muted-foreground opacity-70 outline-none hover:bg-muted hover:opacity-100 focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
+              aria-label={`Move ${deal.title}. Press Space to pick up, then use arrow keys to move.`}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <GripVertical className="size-4" aria-hidden="true" />
+            </span>
+          ) : null}
+        </div>
       </div>
       <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
         <Building2 className="size-3.5" aria-hidden="true" />
@@ -85,4 +105,6 @@ export function DealCard({
       </div>
     </button>
   );
-}
+});
+
+DealCard.displayName = "DealCard";

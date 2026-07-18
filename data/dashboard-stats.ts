@@ -23,7 +23,17 @@ const formatCurrencyValue = (value: number) =>
     maximumFractionDigits: 0,
   }).format(value);
 
-const totalRevenue = deals.reduce((sum, deal) => sum + deal.value, 0);
+const activeDealsCount = deals.filter(
+  (deal) => deal.stage !== "won" && deal.stage !== "lost",
+).length;
+
+const totalRevenue = deals.reduce((sum, deal) => {
+  if (deal.stage === "won") {
+    return sum + deal.value;
+  }
+
+  return sum;
+}, 0);
 
 export const dashboardStats: DashboardStat[] = [
   {
@@ -38,7 +48,7 @@ export const dashboardStats: DashboardStat[] = [
   {
     id: "deals",
     title: "Active Deals",
-    value: formatStatValue(deals.length),
+    value: formatStatValue(activeDealsCount),
     change: "8.2%",
     comparison: "from last month",
     trend: "positive",

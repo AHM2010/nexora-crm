@@ -1,6 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  closestCenter,
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import {
   CircleDollarSign,
   Handshake,
@@ -12,6 +25,7 @@ import {
 import type { Deal, DealPriority, DealStage } from "@/data/deals";
 import { dealStages } from "@/data/deals";
 import { DealColumn } from "@/components/deals/deal-column";
+import { DealCard } from "@/components/deals/deal-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { SearchInput } from "@/components/shared/search-input";
@@ -31,8 +45,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { readStoredDeals, storeDeals } from "@/lib/deals-storage";
 
-type SortOption = "closingDate" | "value" | "customerName";
+type SortOption = "manual" | "closingDate" | "value" | "customerName";
 const stageNames: Record<DealStage, string> = {
   lead: "Lead",
   contacted: "Contacted",
@@ -47,53 +62,131 @@ const currency = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
+function reorderDeals(deals: Deal[], activeId: string, overId: string) {
+  const activeIndex = deals.findIndex((deal) => deal.id === activeId);
+  if (activeIndex < 0 || activeId === overId) return deals;
+
+  const activeDeal = deals[activeIndex];
+  const overDeal = deals.find((deal) => deal.id === overId);
+  const columnStage = overId.startsWith("column-")
+    ? overId.slice("column-".length)
+    : null;
+  const nextStage =
+    columnStage && dealStages.includes(columnStage as DealStage)
+      ? (columnStage as DealStage)
+      : (overDeal?.stage ?? activeDeal.stage);
+  const next = [...deals];
+  next.splice(activeIndex, 1);
+
+  const overIndex = next.findIndex((deal) => deal.id === overId);
+  const insertionIndex =
+    overIndex >= 0
+      ? overIndex
+      : next.reduce(
+          (last, deal, index) =>
+            deal.stage === nextStage ? index + 1 : last,
+          0,
+        );
+  next.splice(insertionIndex, 0, { ...activeDeal, stage: nextStage });
+  return next;
+}
+
 export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
+  const initialDealsRef = useRef(initialDeals);
+  const [boardDeals, setBoardDeals] = useState(initialDeals);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState("");
   const [search, setSearch] = useState("");
   const [stage, setStage] = useState<DealStage | "all">("all");
   const [priority, setPriority] = useState<DealPriority | "all">("all");
-  const [sort, setSort] = useState<SortOption>("closingDate");
+  const [sort, setSort] = useState<SortOption>("manual");
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setBoardDeals(readStoredDeals(initialDealsRef.current));
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   const visibleDeals = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return initialDeals
-      .filter(
-        (deal) =>
-          (stage === "all" || deal.stage === stage) &&
-          (priority === "all" || deal.priority === priority) &&
-          (!term ||
-            `${deal.title} ${deal.customerName} ${deal.company}`
-              .toLowerCase()
-              .includes(term)),
-      )
-      .sort((a, b) =>
-        sort === "value"
-          ? b.value - a.value
-          : sort === "customerName"
-            ? a.customerName.localeCompare(b.customerName)
-            : a.closingDate.localeCompare(b.closingDate),
-      );
-  }, [initialDeals, priority, search, sort, stage]);
+    const filtered = boardDeals.filter(
+      (deal) =>
+        (stage === "all" || deal.stage === stage) &&
+        (priority === "all" || deal.priority === priority) &&
+        (!term ||
+          `${deal.title} ${deal.customerName} ${deal.company}`
+            .toLowerCase()
+            .includes(term)),
+    );
+    return sort === "manual"
+      ? filtered
+      : filtered.toSorted((a, b) =>
+          sort === "value"
+            ? b.value - a.value
+            : sort === "customerName"
+              ? a.customerName.localeCompare(b.customerName)
+              : a.closingDate.localeCompare(b.closingDate),
+        );
+  }, [boardDeals, priority, search, sort, stage]);
 
-  const totalValue = initialDeals.reduce((sum, deal) => sum + deal.value, 0);
-  const won = initialDeals.filter((deal) => deal.stage === "won");
-  const lost = initialDeals.filter((deal) => deal.stage === "lost");
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 180, tolerance: 8 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+  const totalValue = boardDeals.reduce((sum, deal) => sum + deal.value, 0);
+  const won = boardDeals.filter((deal) => deal.stage === "won");
+  const lost = boardDeals.filter((deal) => deal.stage === "lost");
   const hasFilters =
     Boolean(search.trim()) || stage !== "all" || priority !== "all";
 
+  function handleDragStart(event: DragStartEvent) {
+    const id = String(event.active.id);
+    setActiveId(id);
+    setAnnouncement(
+      `Picked up ${boardDeals.find((deal) => deal.id === id)?.title ?? "deal"}.`,
+    );
+  }
+  function handleDragEnd(event: DragEndEvent) {
+    const active = String(event.active.id);
+    setActiveId(null);
+    if (!event.over) {
+      setAnnouncement("Move cancelled. The board was not changed.");
+      return;
+    }
+
+    const next = reorderDeals(boardDeals, active, String(event.over.id));
+    setSort("manual");
+    setBoardDeals(next);
+    const persisted = storeDeals(next);
+    const moved = next.find((deal) => deal.id === active);
+    setAnnouncement(
+      moved
+        ? `${moved.title} moved to ${stageNames[moved.stage]}.${persisted ? "" : " The move could not be saved for the next visit."}`
+        : "Deal moved.",
+    );
+  }
   function clearFilters() {
     setSearch("");
     setStage("all");
     setPriority("all");
   }
+  const activeDeal = activeId
+    ? (boardDeals.find((deal) => deal.id === activeId) ?? null)
+    : null;
 
   return (
     <div className="section-stack motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500">
       <PageHeader
         title="Deals Pipeline"
-        description={`${initialDeals.length} deals · ${currency.format(totalValue)} total pipeline value`}
+        description={`${boardDeals.length} deals · ${currency.format(totalValue)} total pipeline value`}
       />
-
       <section
         aria-label="Pipeline summary"
         className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
@@ -101,7 +194,7 @@ export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
         <StatCard
           className="transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
           title="Total Deals"
-          value={initialDeals.length}
+          value={boardDeals.length}
           icon={Handshake}
           description="Across all pipeline stages"
         />
@@ -187,16 +280,17 @@ export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
           <Select
             value={sort}
             onValueChange={(value) =>
-              setSort((value ?? "closingDate") as SortOption)
+              setSort((value ?? "manual") as SortOption)
             }
           >
             <SelectTrigger
-              className="col-span-2 w-full sm:w-40"
+              className="col-span-2 w-full sm:w-44"
               aria-label="Sort deals"
             >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="manual">Manual board order</SelectItem>
               <SelectItem value="closingDate">Closing date</SelectItem>
               <SelectItem value="value">Deal value</SelectItem>
               <SelectItem value="customerName">Customer name</SelectItem>
@@ -223,7 +317,7 @@ export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
         ) : null}
       </div>
 
-      {initialDeals.length === 0 ? (
+      {boardDeals.length === 0 ? (
         <EmptyState
           icon={Handshake}
           title="Your pipeline is empty"
@@ -241,28 +335,49 @@ export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
           }
         />
       ) : (
-        <section
-          aria-label="Deals kanban board"
-          className="-mx-6 overflow-x-auto overscroll-x-contain scroll-smooth px-6 pb-3 lg:-mx-8 lg:px-8"
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          autoScroll={{ threshold: { x: 0.15, y: 0.15 }, acceleration: 10 }}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={() => setActiveId(null)}
         >
-          <div className="grid snap-x snap-proximity grid-flow-col auto-cols-[82vw] gap-4 sm:auto-cols-68 lg:auto-cols-60">
-            {dealStages.map((columnStage) => {
-              const columnDeals = visibleDeals.filter(
-                (deal) => deal.stage === columnStage,
-              );
-              return (
+          <section
+            aria-label="Deals kanban board"
+            className="-mx-6 overflow-x-auto overscroll-x-contain scroll-smooth px-6 pb-3 lg:-mx-8 lg:px-8"
+          >
+            <p className="sr-only">
+              Use each deal card&apos;s move handle with a pointer, touch, or
+              keyboard. Press Space to pick up a focused handle and use arrow
+              keys to move it.
+            </p>
+            <div className="grid snap-x snap-proximity grid-flow-col auto-cols-[82vw] gap-4 sm:auto-cols-68 lg:auto-cols-60">
+              {dealStages.map((columnStage) => (
                 <DealColumn
                   key={columnStage}
                   stage={columnStage}
                   title={stageNames[columnStage]}
-                  deals={columnDeals}
+                  deals={visibleDeals.filter(
+                    (deal) => deal.stage === columnStage,
+                  )}
                   onOpen={setSelectedDeal}
                 />
-              );
-            })}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+          <DragOverlay dropAnimation={{ duration: 180, easing: "ease" }}>
+            {activeDeal ? (
+              <div className="w-[min(19rem,82vw)] rotate-1 cursor-grabbing opacity-95 shadow-2xl">
+                <DealCard deal={activeDeal} onOpen={() => undefined} />
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       )}
+      <p className="sr-only" aria-live="assertive" aria-atomic="true">
+        {announcement}
+      </p>
 
       <Dialog
         open={selectedDeal !== null}
