@@ -8,22 +8,22 @@ import {
   SquareCheckBig,
   Users,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, usePathname } from "@/src/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 export type NavigationItem = {
-  label: string;
+  label: "dashboard" | "customers" | "deals" | "tasks" | "settings";
   href: string;
   icon: LucideIcon;
 };
 
 export const navigationItems: NavigationItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Customers", href: "/customers", icon: Users },
-  { label: "Deals", href: "/deals", icon: Handshake },
-  { label: "Tasks", href: "/tasks", icon: SquareCheckBig },
-  { label: "Settings", href: "/settings", icon: Settings },
+  { label: "dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "customers", href: "/customers", icon: Users },
+  { label: "deals", href: "/deals", icon: Handshake },
+  { label: "tasks", href: "/tasks", icon: SquareCheckBig },
+  { label: "settings", href: "/settings", icon: Settings },
 ];
 
 export type NavLinksProps = {
@@ -32,9 +32,10 @@ export type NavLinksProps = {
 
 export function NavLinks({ onNavigate }: NavLinksProps) {
   const pathname = usePathname();
+  const t = useTranslations("Navigation");
 
   return (
-    <nav aria-label="Dashboard navigation" className="flex-1 space-y-1 overflow-y-auto p-4">
+    <nav aria-label={t("navigation")} className="flex-1 space-y-1 overflow-y-auto p-4">
       {navigationItems.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
         const Icon = item.icon;
@@ -53,7 +54,7 @@ export function NavLinks({ onNavigate }: NavLinksProps) {
             )}
           >
             <Icon aria-hidden="true" className="size-4" />
-            {item.label}
+            {t(item.label)}
           </Link>
         );
       })}

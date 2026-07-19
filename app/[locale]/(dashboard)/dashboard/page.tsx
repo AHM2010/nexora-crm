@@ -8,13 +8,15 @@ import { TaskWidget } from "@/components/dashboard/task-widget";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { recentActivities } from "@/data/activities";
 import { upcomingTasks } from "@/data/tasks";
+import {getTranslations} from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "Dashboard",
   description: "Review customer activity, sales performance, and upcoming work.",
 };
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const t = await getTranslations("Dashboard");
   return (
     <div className="space-y-6 motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500">
       <DashboardHeader />
@@ -24,8 +26,8 @@ export default function DashboardPage() {
         <Card className="shadow-sm">
           <CardHeader>
             <SectionHeader
-              title="Recent activities"
-              description="The latest updates from your customers"
+              title={t("recent")}
+              description={t("recentDescription")}
             />
           </CardHeader>
           <CardContent className="px-0">
@@ -35,8 +37,8 @@ export default function DashboardPage() {
         <Card className="shadow-sm">
           <CardHeader>
             <SectionHeader
-              title="Upcoming tasks"
-              description="Your next priorities, sorted by due date"
+              title={t("upcoming")}
+              description={t("upcomingDescription")}
             />
           </CardHeader>
           <CardContent className="px-0">

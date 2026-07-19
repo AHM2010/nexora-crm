@@ -3,15 +3,11 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { PriorityBadge } from "@/components/shared/priority-badge";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { DashboardTask } from "@/data/tasks";
-
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-});
+import {useFormatter, useTranslations} from "next-intl";
 
 export function TaskWidget({ tasks }: { tasks: DashboardTask[] }) {
+  const t = useTranslations("Dashboard");
+  const format = useFormatter();
   if (!tasks.length)
     return (
       <EmptyState
@@ -26,7 +22,7 @@ export function TaskWidget({ tasks }: { tasks: DashboardTask[] }) {
   return (
     <ul
       className="max-h-96 divide-y overflow-y-auto"
-      aria-label="Upcoming tasks"
+      aria-label={t("upcomingLabel")}
     >
       {sortedTasks.map((task) => (
         <li
@@ -37,9 +33,9 @@ export function TaskWidget({ tasks }: { tasks: DashboardTask[] }) {
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">{task.title}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Due{" "}
+                {t("due")}{" "}
                 <time dateTime={task.dueDate}>
-                  {dateFormatter.format(new Date(task.dueDate))}
+                  {format.dateTime(new Date(task.dueDate), {month: "short", day: "numeric", hour: "numeric", minute: "2-digit"})}
                 </time>
               </p>
             </div>

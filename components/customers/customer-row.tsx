@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/src/i18n/navigation";
 import type { Customer } from "@/data/customers";
 import { CustomerActionsDropdown } from "@/components/customers/customer-actions-dropdown";
 import { CustomerAvatar } from "@/components/customers/customer-avatar";

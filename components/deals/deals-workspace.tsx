@@ -46,6 +46,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { readStoredDeals, storeDeals } from "@/lib/deals-storage";
+import {useFormatter, useTranslations} from "next-intl";
 
 type SortOption = "manual" | "closingDate" | "value" | "customerName";
 const stageNames: Record<DealStage, string> = {
@@ -92,6 +93,10 @@ function reorderDeals(deals: Deal[], activeId: string, overId: string) {
 }
 
 export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
+  const t = useTranslations("Crm");
+  const filtersT = useTranslations("Filters");
+  const statusT = useTranslations("Status");
+  const format = useFormatter();
   const initialDealsRef = useRef(initialDeals);
   const [boardDeals, setBoardDeals] = useState(initialDeals);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -184,30 +189,30 @@ export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
   return (
     <div className="section-stack motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500">
       <PageHeader
-        title="Deals Pipeline"
-        description={`${boardDeals.length} deals · ${currency.format(totalValue)} total pipeline value`}
+        title={t("dealsTitle")}
+        description={t("dealsDescription", {count: boardDeals.length, value: format.number(totalValue, {style: "currency", currency: "USD", maximumFractionDigits: 0})})}
       />
       <section
-        aria-label="Pipeline summary"
+        aria-label={t("pipelineSummary")}
         className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
         <StatCard
           className="transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
-          title="Total Deals"
+          title={t("totalDeals")}
           value={boardDeals.length}
           icon={Handshake}
-          description="Across all pipeline stages"
+          description={t("allStagesDescription")}
         />
         <StatCard
           className="transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
-          title="Pipeline Value"
+          title={t("pipelineValue")}
           value={currency.format(totalValue)}
           icon={CircleDollarSign}
-          description="Total potential revenue"
+          description={t("potentialRevenue")}
         />
         <StatCard
           className="transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
-          title="Won Deals"
+          title={t("wonDeals")}
           value={won.length}
           icon={Trophy}
           description={currency.format(
@@ -216,7 +221,7 @@ export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
         />
         <StatCard
           className="transition duration-200 hover:-translate-y-0.5 hover:shadow-md"
-          title="Lost Deals"
+          title={t("lostDeals")}
           value={lost.length}
           icon={XCircle}
           description={currency.format(
@@ -226,14 +231,14 @@ export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
       </section>
 
       <section
-        aria-label="Deal filters"
+        aria-label={t("dealFilters")}
         className="flex flex-col gap-3 rounded-xl border bg-card p-3 shadow-xs lg:flex-row lg:items-center"
       >
         <SearchInput
           value={search}
           onChange={setSearch}
-          placeholder="Search deals, customers, or companies…"
-          label="Search deals"
+          placeholder={filtersT("dealSearch")}
+          label={filtersT("searchDeals")}
           containerClassName="sm:max-w-none lg:max-w-md lg:flex-1"
         />
         <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
@@ -245,15 +250,15 @@ export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
           >
             <SelectTrigger
               className="w-full sm:w-36"
-              aria-label="Filter by stage"
+              aria-label={filtersT("stage")}
             >
-              <SelectValue />
+              <SelectValue>{stage === "all" ? filtersT("allStages") : statusT(stage)}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All stages</SelectItem>
+              <SelectItem value="all">{filtersT("allStages")}</SelectItem>
               {dealStages.map((item) => (
                 <SelectItem key={item} value={item}>
-                  {stageNames[item]}
+                  {statusT(item)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -266,15 +271,15 @@ export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
           >
             <SelectTrigger
               className="w-full sm:w-36"
-              aria-label="Filter by priority"
+              aria-label={filtersT("priority")}
             >
-              <SelectValue />
+              <SelectValue>{priority === "all" ? filtersT("allPriorities") : filtersT(priority)}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All priorities</SelectItem>
-              <SelectItem value="low">Low priority</SelectItem>
-              <SelectItem value="medium">Medium priority</SelectItem>
-              <SelectItem value="high">High priority</SelectItem>
+              <SelectItem value="all">{filtersT("allPriorities")}</SelectItem>
+              <SelectItem value="low">{filtersT("low")}</SelectItem>
+              <SelectItem value="medium">{filtersT("medium")}</SelectItem>
+              <SelectItem value="high">{filtersT("high")}</SelectItem>
             </SelectContent>
           </Select>
           <Select
@@ -285,15 +290,15 @@ export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
           >
             <SelectTrigger
               className="col-span-2 w-full sm:w-44"
-              aria-label="Sort deals"
+              aria-label={filtersT("sortDeals")}
             >
-              <SelectValue />
+              <SelectValue>{sort === "manual" ? filtersT("manual") : sort === "closingDate" ? filtersT("closingDate") : sort === "value" ? filtersT("dealValue") : filtersT("customerName")}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="manual">Manual board order</SelectItem>
-              <SelectItem value="closingDate">Closing date</SelectItem>
-              <SelectItem value="value">Deal value</SelectItem>
-              <SelectItem value="customerName">Customer name</SelectItem>
+              <SelectItem value="manual">{filtersT("manual")}</SelectItem>
+              <SelectItem value="closingDate">{filtersT("closingDate")}</SelectItem>
+              <SelectItem value="value">{filtersT("dealValue")}</SelectItem>
+              <SelectItem value="customerName">{filtersT("customerName")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -307,12 +312,12 @@ export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
           <span className="font-medium text-foreground">
             {visibleDeals.length}
           </span>{" "}
-          {visibleDeals.length === 1 ? "deal" : "deals"} shown
+          {t("dealCount", {count: visibleDeals.length}).replace(/^\d+\s*/, "")}
         </p>
         {hasFilters ? (
           <Button variant="ghost" size="sm" onClick={clearFilters}>
             <RotateCcw />
-            Reset filters
+            {t("resetFilters")}
           </Button>
         ) : null}
       </div>
@@ -320,17 +325,17 @@ export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
       {boardDeals.length === 0 ? (
         <EmptyState
           icon={Handshake}
-          title="Your pipeline is empty"
-          description="Create your first deal to start tracking opportunities across the sales process."
+          title={t("emptyPipeline")}
+          description={t("emptyPipelineDescription")}
         />
       ) : visibleDeals.length === 0 ? (
         <EmptyState
           icon={SearchX}
-          title="No deals found"
-          description="No deals match your current search and filters. Try broadening your criteria."
+          title={t("noDeals")}
+          description={t("noDealsDescription")}
           action={
             <Button variant="outline" onClick={clearFilters}>
-              Clear filters
+              {t("clearFilters")}
             </Button>
           }
         />
@@ -344,7 +349,7 @@ export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
           onDragCancel={() => setActiveId(null)}
         >
           <section
-            aria-label="Deals kanban board"
+            aria-label={t("kanban")}
             className="-mx-6 overflow-x-auto overscroll-x-contain scroll-smooth px-6 pb-3 lg:-mx-8 lg:px-8"
           >
             <p className="sr-only">
@@ -357,7 +362,7 @@ export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
                 <DealColumn
                   key={columnStage}
                   stage={columnStage}
-                  title={stageNames[columnStage]}
+                  title={statusT(columnStage)}
                   deals={visibleDeals.filter(
                     (deal) => deal.stage === columnStage,
                   )}

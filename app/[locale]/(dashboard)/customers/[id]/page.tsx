@@ -9,7 +9,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/customers/[id]">): Promise<Metadata> {
+}: PageProps<"/[locale]/customers/[id]">): Promise<Metadata> {
   const { id } = await params;
   const customer = getCustomerDetails(id);
   return {
@@ -22,7 +22,7 @@ export async function generateMetadata({
 
 export default async function CustomerDetailsPage({
   params,
-}: PageProps<"/customers/[id]">) {
+}: PageProps<"/[locale]/customers/[id]">) {
   const { id } = await params;
   const customer = getCustomerDetails(id);
   if (!customer) notFound();

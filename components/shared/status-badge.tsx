@@ -1,3 +1,6 @@
+"use client";
+
+import {useTranslations} from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -35,12 +38,9 @@ const statusStyles: Record<CrmStatus, string> = {
 
 export type StatusBadgeProps = { status: CrmStatus; className?: string };
 
-const statusLabels: Partial<Record<CrmStatus, string>> = {
-  todo: "To Do",
-  "in-progress": "In Progress",
-};
-
 export function StatusBadge({ status, className }: StatusBadgeProps) {
+  const t = useTranslations("Status");
+  const key = status === "todo" ? "pending" : status === "in-progress" ? "inProgress" : status;
   return (
     <Badge
       variant="outline"
@@ -50,7 +50,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
         className,
       )}
     >
-      {statusLabels[status] ?? status}
+      {t(key as "active" | "inactive" | "contacted" | "lead" | "proposal" | "negotiation" | "won" | "lost" | "pending" | "inProgress" | "completed")}
     </Badge>
   );
 }

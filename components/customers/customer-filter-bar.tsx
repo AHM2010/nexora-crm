@@ -2,6 +2,7 @@
 
 import type { CustomerStatus } from "@/data/customers";
 import type { CustomerSortSelectValue } from "@/components/customers/use-customer-directory";
+import {useTranslations} from "next-intl";
 import { SearchInput } from "@/components/shared/search-input";
 import {
   Select,
@@ -34,13 +35,15 @@ export function CustomerFilterBar({
   onCompanyChange,
   onSortChange,
 }: CustomerFilterBarProps) {
+  const t = useTranslations("Filters");
+  const statusT = useTranslations("Status");
   return (
     <div className="flex flex-col gap-3 rounded-xl border bg-card p-3 shadow-xs lg:flex-row lg:items-center">
       <SearchInput
         value={search}
         onChange={onSearchChange}
-        placeholder="Search name, company, email, or phone…"
-        label="Search customers"
+        placeholder={t("customerSearch")}
+        label={t("customerSearch")}
         containerClassName="sm:max-w-none lg:max-w-md lg:flex-1"
       />
       <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
@@ -52,15 +55,17 @@ export function CustomerFilterBar({
         >
           <SelectTrigger
             className="w-full sm:w-32"
-            aria-label="Filter by status"
+            aria-label={t("status")}
           >
-            <SelectValue />
+            <SelectValue>
+              {status === "all" ? t("allStatuses") : statusT(status)}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-            <SelectItem value="lead">Lead</SelectItem>
+            <SelectItem value="all">{t("allStatuses")}</SelectItem>
+            <SelectItem value="active">{statusT("active")}</SelectItem>
+            <SelectItem value="inactive">{statusT("inactive")}</SelectItem>
+            <SelectItem value="lead">{statusT("lead")}</SelectItem>
           </SelectContent>
         </Select>
         <Select
@@ -69,12 +74,12 @@ export function CustomerFilterBar({
         >
           <SelectTrigger
             className="w-full sm:w-44"
-            aria-label="Filter by company"
+            aria-label={t("company")}
           >
-            <SelectValue />
+            <SelectValue>{company === "all" ? t("allCompanies") : company}</SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All companies</SelectItem>
+            <SelectItem value="all">{t("allCompanies")}</SelectItem>
             {companies.map((item) => (
               <SelectItem key={item} value={item}>
                 {item}
@@ -90,20 +95,22 @@ export function CustomerFilterBar({
         >
           <SelectTrigger
             className="col-span-2 w-full sm:w-36"
-            aria-label="Sort customers"
+            aria-label={t("sortCustomers")}
           >
-            <SelectValue />
+            <SelectValue>
+              {sort === "newest" ? t("newest") : sort === "oldest" ? t("oldest") : sort === "name-asc" ? t("nameAZ") : sort === "name-desc" ? t("nameZA") : t("customSort")}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {sort === "custom" ? (
               <SelectItem value="custom" disabled>
-                Custom sort
+                {t("customSort")}
               </SelectItem>
             ) : null}
-            <SelectItem value="newest">Newest</SelectItem>
-            <SelectItem value="oldest">Oldest</SelectItem>
-            <SelectItem value="name-asc">Name A–Z</SelectItem>
-            <SelectItem value="name-desc">Name Z–A</SelectItem>
+            <SelectItem value="newest">{t("newest")}</SelectItem>
+            <SelectItem value="oldest">{t("oldest")}</SelectItem>
+            <SelectItem value="name-asc">{t("nameAZ")}</SelectItem>
+            <SelectItem value="name-desc">{t("nameZA")}</SelectItem>
           </SelectContent>
         </Select>
       </div>

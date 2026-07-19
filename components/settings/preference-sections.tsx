@@ -1,8 +1,11 @@
 "use client";
 
 import { Laptop, Moon, Smartphone, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useTheme, type Theme } from "@/components/theme-provider";
+import {useLocale, useTranslations} from "next-intl";
+import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from "react";
+import {usePathname, useRouter} from "@/src/i18n/navigation";
+import type {AppLocale} from "@/src/i18n/routing";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -90,20 +93,20 @@ export function NotificationSettings() {
 
 export function ThemeSettings() {
   const { theme, setTheme } = useTheme();
+  const t = useTranslations("Settings");
   const mounted = useSyncExternalStore(
     () => () => undefined,
     () => true,
     () => false,
   );
-  const options = [
-    { value: "light", label: "Light", icon: Sun },
-    { value: "dark", label: "Dark", icon: Moon },
-    { value: "system", label: "System", icon: Laptop },
+  const options: Array<{value: Theme; label: "light" | "dark" | "system"; icon: typeof Sun}> = [
+    { value: "light", label: "light", icon: Sun }, { value: "dark", label: "dark", icon: Moon },
+    { value: "system", label: "system", icon: Laptop },
   ];
   return (
     <div
       role="radiogroup"
-      aria-label="Theme"
+      aria-label={t("theme")}
       className="grid gap-3 sm:grid-cols-3"
     >
       {options.map(({ value, label, icon: Icon }) => (
@@ -114,16 +117,16 @@ export function ThemeSettings() {
           aria-checked={mounted && theme === value}
           onClick={() => setTheme(value)}
           className={cn(
-            "rounded-xl border p-4 text-left outline-none transition-all hover:border-foreground/30 hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring/50",
+            "rounded-xl border p-4 text-start outline-none transition-all hover:border-foreground/30 hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring/50",
             mounted &&
               theme === value &&
               "border-foreground bg-muted ring-1 ring-foreground",
           )}
         >
           <Icon aria-hidden className="mb-5 size-5" />
-          <span className="block text-sm font-medium">{label} mode</span>
+          <span className="block text-sm font-medium">{t("mode", {theme: t(label)})}</span>
           <span className="mt-1 block text-xs text-muted-foreground">
-            {value === "system" ? "Match your device" : `Always use ${value}`}
+            {value === "system" ? t("matchDevice") : t("alwaysUse", {theme: t(label)})}
           </span>
         </button>
       ))}
@@ -135,19 +138,23 @@ type Appearance = {
   compact: boolean;
   animations: boolean;
   sidebarCollapsed: boolean;
-  language: "en";
 };
 export function AppearanceSettings() {
+  const t = useTranslations("Settings");
+  const languageT = useTranslations("Language");
+  const locale = useLocale() as AppLocale;
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isChangingLanguage, startLanguageTransition] = useTransition();
   const [settings, setSettings] = useStoredState<Appearance>(
     "nexora-appearance",
     {
       compact: false,
       animations: true,
       sidebarCollapsed: false,
-      language: "en",
     },
   );
-  const toggles: Array<[keyof Omit<Appearance, "language">, string, string]> = [
+  const toggles: Array<[keyof Appearance, string, string]> = [
     ["compact", "Compact mode", "Reduce spacing to show more information."],
     [
       "animations",
@@ -174,23 +181,23 @@ export function AppearanceSettings() {
         </SettingRow>
       ))}
       <SettingRow
-        label="Language"
-        description="Choose the language used across Nexora."
+        label={languageT("label")}
+        description={t("languageDescription")}
       >
         <Select
-          value={settings.language}
-          onValueChange={(language) =>
-            setSettings((current) => ({
-              ...current,
-              language: language as "en",
-            }))
-          }
+          value={locale}
+          disabled={isChangingLanguage}
+          onValueChange={(language) => {
+            if (!language || language === locale) return;
+            startLanguageTransition(() => router.replace(pathname, {locale: language as AppLocale}));
+          }}
         >
-          <SelectTrigger aria-label="Language" className="w-36">
-            <SelectValue />
+          <SelectTrigger aria-label={languageT("switchLabel")} className="w-40">
+            <SelectValue>{locale === "ar" ? languageT("arabic") : languageT("english")}</SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="en">English</SelectItem>
+            <SelectItem value="en"><span lang="en" dir="ltr">{languageT("english")}</span></SelectItem>
+            <SelectItem value="ar"><span lang="ar" dir="rtl">{languageT("arabic")}</span></SelectItem>
           </SelectContent>
         </Select>
       </SettingRow>

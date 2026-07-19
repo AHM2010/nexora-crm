@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowDownAZ, ArrowUpAZ } from "lucide-react";
+import {useTranslations} from "next-intl";
 import type { TaskPriority, TaskStatus } from "@/data/tasks";
 import type {
   TaskSortDirection,
@@ -30,16 +31,18 @@ export type TaskFilterBarProps = {
 };
 
 export function TaskFilterBar(props: TaskFilterBarProps) {
+  const t = useTranslations("Filters");
+  const statusT = useTranslations("Status");
   return (
     <section
-      aria-label="Task filters"
+      aria-label={t("sortTasks")}
       className="flex flex-col gap-3 rounded-xl border bg-card p-3 shadow-xs lg:flex-row lg:items-center"
     >
       <SearchInput
         value={props.search}
         onChange={props.onSearchChange}
-        placeholder="Search title, description, or assignee…"
-        label="Search tasks"
+        placeholder={t("taskSearch")}
+        label={t("taskSearch")}
         containerClassName="sm:max-w-none lg:max-w-md lg:flex-1"
       />
       <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
@@ -51,16 +54,18 @@ export function TaskFilterBar(props: TaskFilterBarProps) {
         >
           <SelectTrigger
             className="w-full sm:w-36"
-            aria-label="Filter by priority"
+            aria-label={t("priority")}
           >
-            <SelectValue />
+            <SelectValue>
+              {props.priority === "all" ? t("allPriorities") : statusT(props.priority)}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All priorities</SelectItem>
-            <SelectItem value="low">Low</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-            <SelectItem value="urgent">Urgent</SelectItem>
+            <SelectItem value="all">{t("allPriorities")}</SelectItem>
+            <SelectItem value="low">{statusT("low")}</SelectItem>
+            <SelectItem value="medium">{statusT("medium")}</SelectItem>
+            <SelectItem value="high">{statusT("high")}</SelectItem>
+            <SelectItem value="urgent">{statusT("urgent")}</SelectItem>
           </SelectContent>
         </Select>
         <Select
@@ -71,15 +76,17 @@ export function TaskFilterBar(props: TaskFilterBarProps) {
         >
           <SelectTrigger
             className="w-full sm:w-36"
-            aria-label="Filter by status"
+            aria-label={t("status")}
           >
-            <SelectValue />
+            <SelectValue>
+              {props.status === "all" ? t("allStatuses") : props.status === "todo" ? statusT("pending") : props.status === "in-progress" ? statusT("inProgress") : statusT("completed")}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="todo">To Do</SelectItem>
-            <SelectItem value="in-progress">In Progress</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="all">{t("allStatuses")}</SelectItem>
+            <SelectItem value="todo">{statusT("pending")}</SelectItem>
+            <SelectItem value="in-progress">{statusT("inProgress")}</SelectItem>
+            <SelectItem value="completed">{statusT("completed")}</SelectItem>
           </SelectContent>
         </Select>
         <Select
@@ -88,19 +95,21 @@ export function TaskFilterBar(props: TaskFilterBarProps) {
             props.onSortFieldChange((value ?? "dueDate") as TaskSortField)
           }
         >
-          <SelectTrigger className="w-full sm:w-36" aria-label="Sort tasks by">
-            <SelectValue />
+          <SelectTrigger className="w-full sm:w-36" aria-label={t("sortTasks")}>
+            <SelectValue>
+              {props.sortField === "dueDate" ? t("dueDate") : props.sortField === "priority" ? t("taskPriority") : t("taskTitle")}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="dueDate">Due date</SelectItem>
-            <SelectItem value="priority">Priority</SelectItem>
-            <SelectItem value="title">Task title</SelectItem>
+            <SelectItem value="dueDate">{t("dueDate")}</SelectItem>
+            <SelectItem value="priority">{t("taskPriority")}</SelectItem>
+            <SelectItem value="title">{t("taskTitle")}</SelectItem>
           </SelectContent>
         </Select>
         <Button
           variant="outline"
           onClick={props.onSortDirectionToggle}
-          aria-label={`Sort ${props.sortDirection === "asc" ? "descending" : "ascending"}`}
+          aria-label={props.sortDirection === "asc" ? t("sortDescending") : t("sortAscending")}
           aria-pressed={props.sortDirection === "desc"}
         >
           {props.sortDirection === "asc" ? (
@@ -109,7 +118,7 @@ export function TaskFilterBar(props: TaskFilterBarProps) {
             <ArrowDownAZ aria-hidden="true" />
           )}
           <span className="sm:sr-only">
-            {props.sortDirection === "asc" ? "Ascending" : "Descending"}
+            {props.sortDirection === "asc" ? t("ascending") : t("descending")}
           </span>
         </Button>
       </div>

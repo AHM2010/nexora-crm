@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import {useTranslations} from "next-intl";
 import type { Customer } from "@/data/customers";
 import type {
   CustomerSort,
@@ -18,15 +19,11 @@ import {
 
 const columns: Array<{
   key: CustomerSortKey;
-  label: string;
   className: string;
 }> = [
-  { key: "name", label: "Customer", className: "min-w-56 px-4" },
-  { key: "company", label: "Company", className: "min-w-40" },
-  { key: "email", label: "Email", className: "min-w-56" },
-  { key: "phone", label: "Phone", className: "min-w-40" },
-  { key: "status", label: "Status", className: "w-28" },
-  { key: "createdAt", label: "Created", className: "min-w-32" },
+  { key: "name", className: "min-w-56 px-4" }, { key: "company", className: "min-w-40" },
+  { key: "email", className: "min-w-56" }, { key: "phone", className: "min-w-40" },
+  { key: "status", className: "w-28" }, { key: "createdAt", className: "min-w-32" },
 ];
 
 export type CustomerTableProps = {
@@ -48,10 +45,11 @@ export function CustomerTable({
   emptyState,
   resultsKey,
 }: CustomerTableProps) {
+  const t = useTranslations("Table");
   return (
     <div className="overflow-hidden rounded-xl border bg-card">
       <Table containerClassName="max-h-[min(65vh,44rem)]">
-        <caption className="sr-only">Customer directory</caption>
+        <caption className="sr-only">{t("directory")}</caption>
         <TableHeader className="sticky top-0 z-10 bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/85">
           <TableRow>
             {columns.map((column) => {
@@ -78,9 +76,9 @@ export function CustomerTable({
                   <button
                     type="button"
                     onClick={() => onSort(column.key)}
-                    className="-ml-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+                    className="-ms-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    {column.label}
+                    {t(column.key)}
                     <SortIcon
                       aria-hidden="true"
                       className="size-3.5 text-muted-foreground"
@@ -90,7 +88,7 @@ export function CustomerTable({
               );
             })}
             <TableHead className="w-12">
-              <span className="sr-only">Customer actions</span>
+              <span className="sr-only">{t("actions")}</span>
             </TableHead>
           </TableRow>
         </TableHeader>

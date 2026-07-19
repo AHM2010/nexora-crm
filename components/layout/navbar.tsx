@@ -1,10 +1,11 @@
 "use client";
 
 import { Bell, LogOut, Menu, Moon, Search, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
-import { usePathname } from "next/navigation";
+import { useTheme } from "@/components/theme-provider";
+import { useTranslations } from "next-intl";
+import { usePathname, useRouter } from "@/src/i18n/navigation";
 import { navigationItems } from "@/components/layout/nav-links";
-import { useRouter } from "next/navigation";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { useAuth } from "@/components/auth/auth-provider";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import {
@@ -27,12 +28,14 @@ const iconButtonClass =
 
 export function Navbar({ isMobileMenuOpen, onMobileMenuToggle }: NavbarProps) {
   const pathname = usePathname();
+  const t = useTranslations("Navbar");
+  const navT = useTranslations("Navigation");
   const router = useRouter();
   const { user, logout, isReady } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
   const pageTitle =
     navigationItems.find((item) => pathname.startsWith(item.href))?.label ??
-    "Dashboard";
+    "dashboard";
 
   const profileName = isReady ? (user?.name ?? "Ahmed Ashraf") : "";
   const profileEmail = isReady ? (user?.email ?? "admin@nexora.com") : "";
@@ -47,7 +50,7 @@ export function Navbar({ isMobileMenuOpen, onMobileMenuToggle }: NavbarProps) {
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/80 sm:px-6 lg:px-8">
       <button
         type="button"
-        aria-label="Open navigation menu"
+        aria-label={navT("openMenu")}
         aria-expanded={isMobileMenuOpen}
         aria-controls="mobile-sidebar"
         onClick={onMobileMenuToggle}
@@ -57,50 +60,51 @@ export function Navbar({ isMobileMenuOpen, onMobileMenuToggle }: NavbarProps) {
       </button>
 
       <div className="min-w-0 shrink-0">
-        <span className="font-semibold lg:hidden">{pageTitle}</span>
+        <span className="font-semibold lg:hidden">{navT(pageTitle)}</span>
         <div className="hidden items-center gap-2 text-sm lg:flex">
-          <span className="text-muted-foreground">Workspace</span>
+          <span className="text-muted-foreground">{navT("workspace")}</span>
           <span aria-hidden="true" className="text-muted-foreground/50">
             /
           </span>
-          <span className="font-medium">{pageTitle}</span>
+          <span className="font-medium">{navT(pageTitle)}</span>
         </div>
       </div>
 
-      <form role="search" className="ml-auto hidden w-full max-w-sm sm:block">
+      <form role="search" className="ms-auto hidden w-full max-w-sm sm:block">
         <label htmlFor="dashboard-search" className="sr-only">
-          Search workspace
+          {t("searchLabel")}
         </label>
         <div className="relative">
           <Search
             aria-hidden="true"
-            className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
           />
           <input
             id="dashboard-search"
             name="search"
             type="search"
-            placeholder="Search customers, deals, tasks..."
-            className="h-9 w-full rounded-lg border bg-background pl-9 pr-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+            placeholder={t("search")}
+            className="h-9 w-full rounded-lg border bg-background ps-9 pe-3 text-sm outline-none transition-shadow placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
           />
         </div>
       </form>
 
-      <div className="ml-auto flex shrink-0 items-center gap-1 sm:ml-0">
+      <div className="ms-auto flex shrink-0 items-center gap-1 sm:ms-0">
+        <LanguageSwitcher />
         <button
           type="button"
-          aria-label="View notifications"
+          aria-label={t("notifications")}
           className={`${iconButtonClass} relative`}
         >
           <Bell aria-hidden="true" className="size-4" />
           <span
             aria-hidden="true"
-            className="absolute right-2 top-2 size-1.5 rounded-full bg-accent"
+            className="absolute end-2 top-2 size-1.5 rounded-full bg-accent"
           />
         </button>
         <button
           type="button"
-          aria-label="Toggle color theme"
+          aria-label={t("theme")}
           onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
           className={iconButtonClass}
         >
@@ -112,8 +116,8 @@ export function Navbar({ isMobileMenuOpen, onMobileMenuToggle }: NavbarProps) {
             render={
               <button
                 type="button"
-                aria-label="Open profile menu"
-                className="ml-1 rounded-full outline-none ring-offset-2 ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label={t("profile")}
+                className="ms-1 rounded-full outline-none ring-offset-2 ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
               />
             }
           >
@@ -131,7 +135,7 @@ export function Navbar({ isMobileMenuOpen, onMobileMenuToggle }: NavbarProps) {
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onClick={handleLogout}>
               <LogOut aria-hidden="true" />
-              Log out
+              {t("logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

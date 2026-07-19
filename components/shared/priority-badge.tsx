@@ -1,3 +1,6 @@
+"use client";
+
+import {useTranslations} from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +17,7 @@ const priorityStyles: Record<Priority, string> = {
 export type PriorityBadgeProps = { priority: Priority; className?: string };
 
 export function PriorityBadge({ priority, className }: PriorityBadgeProps) {
+  const t = useTranslations("Status");
   return (
     <Badge
       variant="outline"
@@ -23,7 +27,7 @@ export function PriorityBadge({ priority, className }: PriorityBadgeProps) {
         className,
       )}
     >
-      {priority}
+      {t(priority)}
     </Badge>
   );
 }

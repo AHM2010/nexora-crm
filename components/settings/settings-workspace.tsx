@@ -14,6 +14,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useCallback, useState } from "react";
+import {useTranslations} from "next-intl";
 import { useAuth } from "@/components/auth/auth-provider";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
@@ -28,12 +29,9 @@ import { ProfileForm } from "./profile-form";
 import { SettingsCard } from "./settings-card";
 
 const sections = [
-  { id: "profile", label: "Profile", icon: CircleUserRound },
-  { id: "notifications", label: "Notifications", icon: Bell },
-  { id: "theme", label: "Theme", icon: Palette },
-  { id: "security", label: "Security", icon: ShieldCheck },
-  { id: "appearance", label: "Appearance", icon: SlidersHorizontal },
-  { id: "account", label: "Account", icon: Info },
+  { id: "profile", icon: CircleUserRound }, { id: "notifications", icon: Bell },
+  { id: "theme", icon: Palette }, { id: "security", icon: ShieldCheck },
+  { id: "appearance", icon: SlidersHorizontal }, { id: "account", icon: Info },
 ];
 type Toast = { id: number; kind: "success" | "error"; message: string };
 
@@ -70,6 +68,8 @@ function AccountInformation() {
 }
 
 export function SettingsWorkspace() {
+  const t = useTranslations("Settings");
+  const crmT = useTranslations("Crm");
   const [toasts, setToasts] = useState<Toast[]>([]);
   const notify = useCallback((kind: Toast["kind"], message: string) => {
     const id = Date.now();
@@ -83,23 +83,23 @@ export function SettingsWorkspace() {
     <MotionConfig reducedMotion="user">
       <div className="section-stack">
       <PageHeader
-        title="Settings"
-        description="Manage your profile, preferences, security, and account details."
+        title={crmT("settingsTitle")}
+        description={crmT("settingsDescription")}
       />
       <div className="grid items-start gap-6 lg:grid-cols-[210px_minmax(0,1fr)]">
         <nav
-          aria-label="Settings sections"
+          aria-label={crmT("settingsSections")}
           className="sticky top-16 z-10 -mx-6 overflow-x-auto border-y bg-background/95 px-6 py-2 backdrop-blur lg:top-20 lg:mx-0 lg:rounded-xl lg:border lg:p-2"
         >
           <div className="flex min-w-max gap-1 lg:min-w-0 lg:flex-col">
-            {sections.map(({ id, label, icon: Icon }) => (
+            {sections.map(({ id, icon: Icon }) => (
               <a
                 key={id}
                 href={`#${id}`}
                 className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <Icon aria-hidden className="size-4" />
-                {label}
+                {t(id as "profile" | "notifications" | "theme" | "security" | "appearance" | "account")}
               </a>
             ))}
           </div>
@@ -112,48 +112,48 @@ export function SettingsWorkspace() {
         >
           <SettingsCard
             id="profile"
-            title="Profile settings"
-            description="Update your personal and work information."
+            title={t("profileTitle")}
+            description={t("profileDescription")}
             icon={CircleUserRound}
           >
             <ProfileForm notify={notify} />
           </SettingsCard>
           <SettingsCard
             id="notifications"
-            title="Notification settings"
-            description="Choose how and when you want to be notified."
+            title={t("notificationsTitle")}
+            description={t("notificationsDescription")}
             icon={Bell}
           >
             <NotificationSettings />
           </SettingsCard>
           <SettingsCard
             id="theme"
-            title="Theme"
-            description="Choose how Nexora looks on this device."
+            title={t("theme")}
+            description={t("themeDescription")}
             icon={MonitorCog}
           >
             <ThemeSettings />
           </SettingsCard>
           <SettingsCard
             id="security"
-            title="Security"
-            description="Protect your account and manage active sessions."
+            title={t("security")}
+            description={t("securityDescription")}
             icon={ShieldCheck}
           >
             <SecuritySettings notify={notify} />
           </SettingsCard>
           <SettingsCard
             id="appearance"
-            title="Appearance preferences"
-            description="Fine-tune your dashboard experience."
+            title={t("appearanceTitle")}
+            description={t("appearanceDescription")}
             icon={SlidersHorizontal}
           >
             <AppearanceSettings />
           </SettingsCard>
           <SettingsCard
             id="account"
-            title="Account information"
-            description="Read-only details associated with your account."
+            title={t("accountTitle")}
+            description={t("accountDescription")}
             icon={Info}
           >
             <AccountInformation />
@@ -163,7 +163,7 @@ export function SettingsWorkspace() {
       <div
         aria-live="polite"
         aria-atomic="true"
-        className="pointer-events-none fixed right-4 bottom-4 z-50 flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-2"
+        className="pointer-events-none fixed end-4 bottom-4 z-50 flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-2"
       >
         <AnimatePresence>
           {toasts.map((toast) => (
@@ -187,7 +187,7 @@ export function SettingsWorkspace() {
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label="Dismiss notification"
+                aria-label={crmT("dismiss")}
                 onClick={() =>
                   setToasts((items) =>
                     items.filter((item) => item.id !== toast.id),

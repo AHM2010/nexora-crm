@@ -8,6 +8,7 @@ import {
 import { EmptyState } from "@/components/shared/empty-state";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { Activity, ActivityKind } from "@/data/activities";
+import {useTranslations} from "next-intl";
 
 const activityIcons = {
   deal: CircleDollarSign,
@@ -17,6 +18,7 @@ const activityIcons = {
 } satisfies Record<ActivityKind, LucideIcon>;
 
 export function ActivityList({ activities }: { activities: Activity[] }) {
+  const t = useTranslations("Dashboard");
   if (!activities.length)
     return (
       <EmptyState
@@ -28,7 +30,7 @@ export function ActivityList({ activities }: { activities: Activity[] }) {
   return (
     <ul
       className="max-h-96 divide-y overflow-y-auto"
-      aria-label="Recent customer activities"
+      aria-label={t("activityLabel")}
     >
       {activities.map((activity) => {
         const Icon = activityIcons[activity.kind];

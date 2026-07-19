@@ -19,48 +19,50 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
 import { Button } from "@/components/ui/button";
+import {useTranslations} from "next-intl";
 
 export function TasksWorkspace({ initialTasks }: { initialTasks: Task[] }) {
   const directory = useTaskDirectory(initialTasks);
+  const t = useTranslations("Crm");
 
   return (
     <div className="section-stack motion-safe:animate-in motion-safe:fade-in motion-safe:duration-500">
       <PageHeader
-        title="Tasks"
-        description="Track assignments, deadlines, and progress across your customer relationships."
+        title={t("tasksTitle")}
+        description={t("tasksDescription")}
       />
 
       <section
-        aria-label="Task summary"
+        aria-label={t("taskSummary")}
         className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
         <StatCard
           className="shadow-sm transition duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md"
-          title="Total Tasks"
+          title={t("totalTasks")}
           value={directory.statistics.total}
           icon={ListTodo}
-          description="Matching current filters"
+          description={t("matchingFilters")}
         />
         <StatCard
           className="shadow-sm transition duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md"
-          title="Completed Tasks"
+          title={t("completedTasks")}
           value={directory.statistics.completed}
           icon={CircleCheckBig}
-          description="Finished assignments"
+          description={t("finishedAssignments")}
         />
         <StatCard
           className="shadow-sm transition duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md"
-          title="In Progress Tasks"
+          title={t("inProgressTasks")}
           value={directory.statistics.inProgress}
           icon={Clock3}
-          description="Currently being worked"
+          description={t("currentlyWorked")}
         />
         <StatCard
           className="shadow-sm transition duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-md"
-          title="Overdue Tasks"
+          title={t("overdueTasks")}
           value={directory.statistics.overdue}
           icon={TriangleAlert}
-          description="Open tasks past due"
+          description={t("pastDue")}
         />
       </section>
 
@@ -85,12 +87,12 @@ export function TasksWorkspace({ initialTasks }: { initialTasks: Task[] }) {
           <span className="font-medium text-foreground">
             {directory.filteredTasks.length}
           </span>{" "}
-          {directory.filteredTasks.length === 1 ? "task" : "tasks"} shown
+          {t("taskCount", {count: directory.filteredTasks.length}).replace(/^\d+\s*/, "")}
         </p>
         {directory.hasFilters ? (
           <Button variant="ghost" size="sm" onClick={directory.clearFilters}>
             <RotateCcw />
-            Reset filters
+            {t("resetFilters")}
           </Button>
         ) : null}
       </div>
@@ -98,7 +100,7 @@ export function TasksWorkspace({ initialTasks }: { initialTasks: Task[] }) {
       {directory.filteredTasks.length ? (
         <section
           key={directory.resultsKey}
-          aria-label="Task list"
+          aria-label={t("taskList")}
           className="grid gap-4 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1 motion-safe:duration-200 lg:grid-cols-2"
         >
           {directory.filteredTasks.map((task) => (
@@ -113,12 +115,12 @@ export function TasksWorkspace({ initialTasks }: { initialTasks: Task[] }) {
         <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:duration-200">
           <EmptyState
             icon={SearchX}
-            title="No tasks found"
-            description="No tasks match your search and filters. Try clearing a filter or using a broader search."
+            title={t("noTasks")}
+            description={t("noTasksDescription")}
             action={
               directory.hasFilters ? (
                 <Button variant="outline" onClick={directory.clearFilters}>
-                  Clear filters
+                  {t("clearFilters")}
                 </Button>
               ) : undefined
             }

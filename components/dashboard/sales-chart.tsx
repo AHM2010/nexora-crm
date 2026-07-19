@@ -14,42 +14,36 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { SectionHeader } from "@/components/dashboard/section-header";
 import { salesData, type SalesPeriod } from "@/data/sales";
 import { cn } from "@/lib/utils";
+import {useFormatter, useTranslations} from "next-intl";
 
-const periods: { value: SalesPeriod; label: string }[] = [
-  { value: "week", label: "Week" },
-  { value: "month", label: "Month" },
-  { value: "year", label: "Year" },
-];
-const currency = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
+const periods: SalesPeriod[] = ["week", "month", "year"];
 
 export function SalesChart() {
   const [period, setPeriod] = useState<SalesPeriod>("month");
+  const t = useTranslations("Dashboard");
+  const format = useFormatter();
   const gradientId = useId().replaceAll(":", "");
 
   const filter = (
     <div
-      aria-label="Sales period"
+      aria-label={t("salesPeriod")}
       className="flex rounded-lg bg-muted p-1"
       role="group"
     >
       {periods.map((item) => (
         <button
-          key={item.value}
+          key={item}
           type="button"
-          aria-pressed={period === item.value}
-          onClick={() => setPeriod(item.value)}
+          aria-pressed={period === item}
+          onClick={() => setPeriod(item)}
           className={cn(
             "rounded-md px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            period === item.value
+            period === item
               ? "bg-card text-foreground shadow-xs"
               : "text-muted-foreground hover:text-foreground",
           )}
         >
-          {item.label}
+          {t(item)}
         </button>
       ))}
     </div>
@@ -59,14 +53,14 @@ export function SalesChart() {
     <Card className="h-full shadow-sm">
       <CardHeader>
         <SectionHeader
-          title="Sales overview"
-          description="Revenue performance over time"
+          title={t("sales")}
+          description={t("salesDescription")}
           action={filter}
         />
       </CardHeader>
       <CardContent
-        className="h-72 pl-0 sm:h-80"
-        aria-label={`${period} sales chart`}
+        className="h-72 ps-0 sm:h-80"
+        aria-label={t("chart", {period: t(period)})}
         role="img"
       >
         <ResponsiveContainer width="100%" height="100%">
@@ -109,7 +103,7 @@ export function SalesChart() {
             />
             <Tooltip
               cursor={{ stroke: "var(--color-border)" }}
-              formatter={(value) => [currency.format(Number(value)), "Revenue"]}
+              formatter={(value) => [format.number(Number(value), {style: "currency", currency: "USD", maximumFractionDigits: 0}), t("revenueLabel")]}
               contentStyle={{
                 background: "var(--color-popover)",
                 border: "1px solid var(--color-border)",

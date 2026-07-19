@@ -21,23 +21,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     window.location.replace("/login");
   }, [isAuthenticated, isReady, logout]);
 
-  if (!isReady || !isAuthenticated) {
-    return (
-      <main
-        className="flex min-h-dvh items-center justify-center bg-background"
-        aria-busy="true"
-        aria-label="Verifying session"
-      >
-        <p className="text-sm text-muted-foreground">Verifying session...</p>
-      </main>
-    );
-  }
-
   return (
     <div className="min-h-dvh bg-background">
       <Sidebar />
       <MobileSidebar isOpen={isMobileMenuOpen} onClose={closeMobileMenu} />
-      <div className="min-h-dvh lg:pl-64">
+      <div className="min-h-dvh lg:ps-64">
         <Navbar
           isMobileMenuOpen={isMobileMenuOpen}
           onMobileMenuToggle={() => setIsMobileMenuOpen((open) => !open)}

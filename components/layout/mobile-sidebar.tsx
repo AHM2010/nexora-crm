@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 import { SidebarContent } from "@/components/layout/sidebar";
 import { cn } from "@/lib/utils";
+import {useLocale, useTranslations} from "next-intl";
 
 export type MobileSidebarProps = {
   isOpen: boolean;
@@ -11,6 +12,9 @@ export type MobileSidebarProps = {
 };
 
 export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
+  const locale = useLocale();
+  const t = useTranslations("Navigation");
+  const isRtl = locale === "ar";
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -59,7 +63,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
     >
       <button
         type="button"
-        aria-label="Close navigation menu"
+        aria-label={t("closeMenu")}
         tabIndex={isOpen ? 0 : -1}
         onClick={onClose}
         className={cn(
@@ -71,18 +75,19 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
         id="mobile-sidebar"
         role="dialog"
         aria-modal="true"
-        aria-label="Mobile navigation"
+        aria-label={t("mobileNavigation")}
         className={cn(
-          "relative flex h-full w-72 max-w-[85vw] flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-xl transition-transform duration-200 ease-out",
-          isOpen ? "translate-x-0" : "-translate-x-full",
+          "relative flex h-full w-72 max-w-[85vw] flex-col border-e border-sidebar-border bg-sidebar text-sidebar-foreground shadow-xl transition-transform duration-200 ease-out",
+          isRtl && "me-auto",
+          isOpen ? "translate-x-0" : isRtl ? "translate-x-full" : "-translate-x-full",
         )}
       >
         <button
           ref={closeButtonRef}
           type="button"
-          aria-label="Close navigation menu"
+          aria-label={t("closeMenu")}
           onClick={onClose}
-          className="absolute right-3 top-3 z-10 inline-flex size-10 items-center justify-center rounded-md text-sidebar-foreground/70 outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+          className="absolute end-3 top-3 z-10 inline-flex size-10 items-center justify-center rounded-md text-sidebar-foreground/70 outline-none transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring"
         >
           <X aria-hidden="true" className="size-5" />
         </button>

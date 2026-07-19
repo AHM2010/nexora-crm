@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/src/i18n/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,22 +26,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { BrandMark } from "@/components/brand/brand-mark";
 
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email is required.")
-    .email("Enter a valid email address."),
-  password: z
-    .string()
-    .min(1, "Password is required.")
-    .min(8, "Password must be at least 8 characters."),
-  remember: z.boolean(),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+type LoginFormValues = {email: string; password: string; remember: boolean};
 
 export function LoginForm() {
   const router = useRouter();
+  const t = useTranslations("Login");
+  const loginSchema = z.object({
+    email: z.string().min(1, t("emailRequired")).email(t("emailInvalid")),
+    password: z.string().min(1, t("passwordRequired")).min(8, t("passwordLength")),
+    remember: z.boolean()
+  });
   const { isAuthenticated, isReady, login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -69,9 +64,9 @@ export function LoginForm() {
       <CardHeader className="space-y-3 text-center">
         <BrandMark className="mx-auto size-11 rounded-xl" priority />
         <div className="space-y-1">
-          <CardTitle className="text-xl">Welcome back</CardTitle>
+          <CardTitle className="text-xl">{t("title")}</CardTitle>
           <CardDescription>
-            Sign in to continue to your Nexora workspace.
+            {t("description")}
           </CardDescription>
         </div>
       </CardHeader>
@@ -87,7 +82,7 @@ export function LoginForm() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="login-email">Email</FieldLabel>
+                  <FieldLabel htmlFor="login-email">{t("email")}</FieldLabel>
                   <Input
                     {...field}
                     id="login-email"
@@ -107,9 +102,9 @@ export function LoginForm() {
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <div className="flex items-center justify-between">
-                    <FieldLabel htmlFor="login-password">Password</FieldLabel>
+                    <FieldLabel htmlFor="login-password">{t("password")}</FieldLabel>
                     <span className="text-xs font-medium text-muted-foreground">
-                      Forgot password?
+                      {t("forgot")}
                     </span>
                   </div>
                   <div className="relative">
@@ -118,19 +113,19 @@ export function LoginForm() {
                       id="login-password"
                       type={showPassword ? "text" : "password"}
                       autoComplete="current-password"
-                      placeholder="Enter your password"
+                      placeholder={t("passwordPlaceholder")}
                       aria-invalid={fieldState.invalid}
                       disabled={form.formState.isSubmitting}
-                      className="pr-10"
+                      className="pe-10"
                     />
                     <button
                       type="button"
                       aria-label={
-                        showPassword ? "Hide password" : "Show password"
+                        showPassword ? t("hidePassword") : t("showPassword")
                       }
                       aria-pressed={showPassword}
                       onClick={() => setShowPassword((visible) => !visible)}
-                      className="absolute right-1 top-1/2 inline-flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                      className="absolute end-1 top-1/2 inline-flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       {showPassword ? (
                         <EyeOff aria-hidden="true" className="size-4" />
@@ -159,7 +154,7 @@ export function LoginForm() {
                   disabled={form.formState.isSubmitting}
                 />
                 <FieldLabel htmlFor="remember-me" className="font-normal">
-                  Remember me
+                  {t("remember")}
                 </FieldLabel>
               </Field>
             )}
@@ -183,10 +178,10 @@ export function LoginForm() {
             {form.formState.isSubmitting ? (
               <>
                 <LoaderCircle aria-hidden="true" className="animate-spin" />
-                Signing in...
+                {t("submitting")}
               </>
             ) : (
-              "Sign in"
+              t("submit")
             )}
           </Button>
         </form>

@@ -10,6 +10,7 @@ import { useCustomerDirectory } from "@/components/customers/use-customer-direct
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
+import {useTranslations} from "next-intl";
 
 export function CustomerWorkspace({
   initialCustomers,
@@ -17,6 +18,7 @@ export function CustomerWorkspace({
   initialCustomers: Customer[];
 }) {
   const directory = useCustomerDirectory(initialCustomers);
+  const t = useTranslations("Crm");
   const [notice, setNotice] = useState("");
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -34,37 +36,29 @@ export function CustomerWorkspace({
   }
 
   function addCustomer() {
-    flash("Customer creation is ready to connect to your backend.");
+    flash(t("customerReady"));
   }
   function deleteCustomer(customer: Customer) {
     directory.deleteCustomer(customer.id);
-    flash(`${customer.name} was removed from this demo.`);
+    flash(t("customerRemoved", {name: customer.name}));
   }
 
   const emptyState =
     directory.customers.length === 0
       ? {
           icon: Users,
-          title: "No customers yet",
-          description:
-            "Add your first customer to start building meaningful relationships.",
-          action: "Add customer",
+          title: t("noCustomers"), description: t("noCustomersDescription"), action: t("addCustomer"),
           onAction: addCustomer,
         }
       : directory.search
         ? {
             icon: SearchX,
-            title: "No search results",
-            description: `We couldn't find anyone matching “${directory.search}”. Try a different name, company, email, or phone.`,
-            action: "Clear search",
+            title: t("noSearch"), description: t("noSearchDescription", {search: directory.search}), action: t("clearSearch"),
             onAction: () => directory.updateSearch(""),
           }
         : {
             icon: SearchX,
-            title: "No matching customers",
-            description:
-              "No customers match the selected filters. Clear them to see your full customer list.",
-            action: "Clear filters",
+            title: t("noMatchingCustomers"), description: t("noMatchingCustomersDescription"), action: t("clearFilters"),
             onAction: directory.clearFilters,
           };
 
@@ -73,12 +67,12 @@ export function CustomerWorkspace({
   return (
     <div className="section-stack">
       <PageHeader
-        title="Customers"
-        description="Manage customer relationships, contact details, and lifecycle status in one place."
+        title={t("customersTitle")}
+        description={t("customersDescription")}
         action={
           <Button size="lg" onClick={addCustomer}>
             <Plus />
-            Add Customer
+            {t("addCustomer")}
           </Button>
         }
       />
@@ -92,7 +86,7 @@ export function CustomerWorkspace({
           </div>
         ) : null}
       </div>
-      <section aria-label="Customer directory" className="space-y-4">
+      <section aria-label={t("customerDirectory")} className="space-y-4">
         <CustomerFilterBar
           search={directory.search}
           status={directory.status}
@@ -109,14 +103,12 @@ export function CustomerWorkspace({
             <span className="font-medium text-foreground">
               {directory.filteredCustomers.length}
             </span>{" "}
-            {directory.filteredCustomers.length === 1
-              ? "customer"
-              : "customers"}
+            {t("customerCount", {count: directory.filteredCustomers.length}).replace(/^\d+\s*/, "")}
           </p>
           {directory.hasFilters ? (
             <Button variant="ghost" size="sm" onClick={directory.clearFilters}>
               <RotateCcw />
-              Reset filters
+              {t("resetFilters")}
             </Button>
           ) : null}
         </div>
