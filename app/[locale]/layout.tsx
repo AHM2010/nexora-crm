@@ -2,6 +2,7 @@ import type {Metadata} from "next";
 import {hasLocale, NextIntlClientProvider} from "next-intl";
 import {setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
+import {cookies} from "next/headers";
 import {Geist, Geist_Mono} from "next/font/google";
 import Script from "next/script";
 import {AuthProvider} from "@/components/auth/auth-provider";
@@ -29,15 +30,20 @@ export default async function LocaleLayout({children, params}: LayoutProps<"/[lo
   const {locale} = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
+  const cookieStore = await cookies();
+  const themeCookie = cookieStore.get("nexora_theme")?.value;
+  const resolvedCookie = cookieStore.get("nexora_resolved_theme")?.value;
+  const initialTheme = themeCookie === "light" || themeCookie === "dark" || themeCookie === "system" ? themeCookie : "system";
+  const initialResolvedTheme = resolvedCookie === "dark" ? "dark" : "light";
 
   return (
-    <html lang={locale} dir={getDirection(locale)} data-scroll-behavior="smooth" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang={locale} dir={getDirection(locale)} data-scroll-behavior="smooth" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} ${initialResolvedTheme === "dark" ? "dark" : ""} h-full antialiased`} style={{colorScheme: initialResolvedTheme, backgroundColor: initialResolvedTheme === "dark" ? "#0a0a0a" : "#ffffff"}}>
       <body className="min-h-full bg-background text-foreground">
         <Script id="theme-initializer" strategy="beforeInteractive">
           {`(function(){try{var t=localStorage.getItem('theme')||'system';var d=t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);document.documentElement.style.colorScheme=d?'dark':'light';document.cookie='nexora_theme='+t+'; path=/; max-age=31536000; SameSite=Lax';document.cookie='nexora_resolved_theme='+(d?'dark':'light')+'; path=/; max-age=31536000; SameSite=Lax'}catch(e){}})();`}
         </Script>
         <NextIntlClientProvider>
-          <ThemeProvider>
+          <ThemeProvider initialTheme={initialTheme} initialResolvedTheme={initialResolvedTheme}>
             <AuthProvider>
               <TooltipProvider>{children}</TooltipProvider>
             </AuthProvider>
