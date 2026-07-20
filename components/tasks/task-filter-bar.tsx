@@ -8,14 +8,8 @@ import type {
   TaskSortField,
 } from "@/components/tasks/use-task-directory";
 import { SearchInput } from "@/components/shared/search-input";
+import {SortDropdown} from "@/components/shared/sort-dropdown";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 export type TaskFilterBarProps = {
   search: string;
@@ -46,66 +40,48 @@ export function TaskFilterBar(props: TaskFilterBarProps) {
         containerClassName="sm:max-w-none lg:max-w-md lg:flex-1"
       />
       <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-        <Select
+        <SortDropdown
           value={props.priority}
+          label={t("priority")}
+          className="w-full sm:w-36"
+          options={[
+            {value: "all", label: t("allPriorities")},
+            {value: "low", label: statusT("low")},
+            {value: "medium", label: statusT("medium")},
+            {value: "high", label: statusT("high")},
+            {value: "urgent", label: statusT("urgent")},
+          ]}
           onValueChange={(value) =>
-            props.onPriorityChange((value ?? "all") as TaskPriority | "all")
+            props.onPriorityChange(value as TaskPriority | "all")
           }
-        >
-          <SelectTrigger
-            className="w-full sm:w-36"
-            aria-label={t("priority")}
-          >
-            <SelectValue>
-              {props.priority === "all" ? t("allPriorities") : statusT(props.priority)}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("allPriorities")}</SelectItem>
-            <SelectItem value="low">{statusT("low")}</SelectItem>
-            <SelectItem value="medium">{statusT("medium")}</SelectItem>
-            <SelectItem value="high">{statusT("high")}</SelectItem>
-            <SelectItem value="urgent">{statusT("urgent")}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select
+        />
+        <SortDropdown
           value={props.status}
+          label={t("status")}
+          className="w-full sm:w-36"
+          options={[
+            {value: "all", label: t("allStatuses")},
+            {value: "todo", label: statusT("pending")},
+            {value: "in-progress", label: statusT("inProgress")},
+            {value: "completed", label: statusT("completed")},
+          ]}
           onValueChange={(value) =>
-            props.onStatusChange((value ?? "all") as TaskStatus | "all")
+            props.onStatusChange(value as TaskStatus | "all")
           }
-        >
-          <SelectTrigger
-            className="w-full sm:w-36"
-            aria-label={t("status")}
-          >
-            <SelectValue>
-              {props.status === "all" ? t("allStatuses") : props.status === "todo" ? statusT("pending") : props.status === "in-progress" ? statusT("inProgress") : statusT("completed")}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("allStatuses")}</SelectItem>
-            <SelectItem value="todo">{statusT("pending")}</SelectItem>
-            <SelectItem value="in-progress">{statusT("inProgress")}</SelectItem>
-            <SelectItem value="completed">{statusT("completed")}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select
+        />
+        <SortDropdown
           value={props.sortField}
+          label={t("sortTasks")}
+          className="w-full sm:w-36"
+          options={[
+            {value: "dueDate", label: t("dueDate")},
+            {value: "priority", label: t("taskPriority")},
+            {value: "title", label: t("taskTitle")},
+          ]}
           onValueChange={(value) =>
-            props.onSortFieldChange((value ?? "dueDate") as TaskSortField)
+            props.onSortFieldChange(value as TaskSortField)
           }
-        >
-          <SelectTrigger className="w-full sm:w-36" aria-label={t("sortTasks")}>
-            <SelectValue>
-              {props.sortField === "dueDate" ? t("dueDate") : props.sortField === "priority" ? t("taskPriority") : t("taskTitle")}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="dueDate">{t("dueDate")}</SelectItem>
-            <SelectItem value="priority">{t("taskPriority")}</SelectItem>
-            <SelectItem value="title">{t("taskTitle")}</SelectItem>
-          </SelectContent>
-        </Select>
+        />
         <Button
           variant="outline"
           onClick={props.onSortDirectionToggle}

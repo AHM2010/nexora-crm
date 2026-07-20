@@ -6,7 +6,7 @@ import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { useRouter } from "@/src/i18n/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +30,7 @@ type LoginFormValues = {email: string; password: string; remember: boolean};
 
 export function LoginForm() {
   const router = useRouter();
+  const locale = useLocale();
   const t = useTranslations("Login");
   const loginSchema = z.object({
     email: z.string().min(1, t("emailRequired")).email(t("emailInvalid")),
@@ -55,8 +56,7 @@ export function LoginForm() {
       setAuthError(result.error);
       return;
     }
-    router.replace("/dashboard");
-    router.refresh();
+    window.location.replace(`/${locale}/dashboard`);
   }
 
   return (

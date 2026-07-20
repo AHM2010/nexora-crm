@@ -6,7 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useSyncExternalStore,
+  useState,
 } from "react";
 import {
   AUTH_COOKIE_NAME,
@@ -41,11 +41,8 @@ export type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-const listeners = new Set<() => void>();
-let cachedUser: AuthUser | null | undefined;
 let cachedExpiresAt: number | null = null;
 let cachedLastLoginAt: number | null = null;
-let hasInitializedAuth = false;
 
 type StoredAuthSession = {
   user: AuthUser;
@@ -53,17 +50,12 @@ type StoredAuthSession = {
   lastLoginAt?: number;
 };
 
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
 function readStoredUser(): AuthUser | null {
-  const stored =
-    localStorage.getItem(AUTH_STORAGE_KEY) ??
-    sessionStorage.getItem(AUTH_STORAGE_KEY);
-  if (!stored) return null;
   try {
+    const stored =
+      localStorage.getItem(AUTH_STORAGE_KEY) ??
+      sessionStorage.getItem(AUTH_STORAGE_KEY);
+    if (!stored) return null;
     const session = JSON.parse(stored) as Partial<StoredAuthSession>;
     const user = session.user;
     if (
@@ -94,46 +86,31 @@ function readStoredUser(): AuthUser | null {
 }
 
 function clearStoredSession() {
-  localStorage.removeItem(AUTH_STORAGE_KEY);
-  sessionStorage.removeItem(AUTH_STORAGE_KEY);
-  document.cookie = `${AUTH_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
+  try {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    sessionStorage.removeItem(AUTH_STORAGE_KEY);
+  } catch {
+    // Storage can be unavailable in privacy-restricted browser contexts.
+  }
+  try {
+    document.cookie = `${AUTH_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
+  } catch {
+    // Keep the in-memory logout effective even if cookies are blocked.
+  }
   cachedExpiresAt = null;
   cachedLastLoginAt = null;
-  hasInitializedAuth = true;
-}
-
-function getUserSnapshot() {
-  if (!hasInitializedAuth) {
-    cachedUser = readStoredUser();
-    hasInitializedAuth = true;
-  } else if (cachedUser === undefined) {
-    cachedUser = readStoredUser();
-  }
-  return cachedUser;
-}
-
-function getAuthReadySnapshot() {
-  if (!hasInitializedAuth) {
-    cachedUser = readStoredUser();
-    hasInitializedAuth = true;
-  }
-  return hasInitializedAuth;
-}
-
-function setAuthUser(user: AuthUser | null, lastLoginAt: number | null = null) {
-  cachedUser = user;
-  cachedLastLoginAt = lastLoginAt;
-  hasInitializedAuth = true;
-  listeners.forEach((listener) => listener());
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const user = useSyncExternalStore(subscribe, getUserSnapshot, () => null);
-  const isReady = useSyncExternalStore(
-    subscribe,
-    getAuthReadySnapshot,
-    () => false,
-  );
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      setUser(readStoredUser());
+      setIsReady(true);
+    });
+  }, []);
 
   useEffect(() => {
     if (!user || !cachedExpiresAt) return;
@@ -143,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const remainingTime = (cachedExpiresAt ?? 0) - Date.now();
       if (remainingTime <= 0) {
         clearStoredSession();
-        setAuthUser(null);
+        setUser(null);
         window.location.replace("/login");
         return;
       }
@@ -195,15 +172,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         expiresAt: Date.now() + sessionSeconds * 1000,
         lastLoginAt,
       };
-      localStorage.removeItem(AUTH_STORAGE_KEY);
-      sessionStorage.removeItem(AUTH_STORAGE_KEY);
-      (remember ? localStorage : sessionStorage).setItem(
-        AUTH_STORAGE_KEY,
-        JSON.stringify(session),
-      );
+      try {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        sessionStorage.removeItem(AUTH_STORAGE_KEY);
+        (remember ? localStorage : sessionStorage).setItem(
+          AUTH_STORAGE_KEY,
+          JSON.stringify(session),
+        );
+      } catch {
+        return {
+          success: false,
+          error: "Your browser blocked session storage. Enable site storage and try again.",
+        };
+      }
       cachedExpiresAt = session.expiresAt;
       document.cookie = `${AUTH_COOKIE_NAME}=${AUTH_COOKIE_VALUE}; path=/; SameSite=Lax; max-age=${sessionSeconds}`;
-      setAuthUser(authenticatedUser, lastLoginAt);
+      cachedLastLoginAt = lastLoginAt;
+      setUser(authenticatedUser);
       return { success: true };
     },
     [],
@@ -211,25 +196,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(() => {
     clearStoredSession();
-    setAuthUser(null);
+    setUser(null);
   }, []);
 
   const updateProfile = useCallback(async (profile: AuthUser) => {
     await new Promise((resolve) => setTimeout(resolve, 650));
-    const storage = localStorage.getItem(AUTH_STORAGE_KEY)
-      ? localStorage
-      : sessionStorage;
-    const stored = storage.getItem(AUTH_STORAGE_KEY);
-    if (!stored) throw new Error("No active session");
-    const session = JSON.parse(stored) as StoredAuthSession;
-    storage.setItem(
-      AUTH_STORAGE_KEY,
-      JSON.stringify({
-        ...session,
-        user: { ...profile, userId: profile.userId ?? session.user.userId },
-      }),
-    );
-    setAuthUser(profile, cachedLastLoginAt);
+    try {
+      const storage = localStorage.getItem(AUTH_STORAGE_KEY)
+        ? localStorage
+        : sessionStorage;
+      const stored = storage.getItem(AUTH_STORAGE_KEY);
+      if (!stored) throw new Error("No active session");
+      const session: unknown = JSON.parse(stored);
+      if (!session || typeof session !== "object" || !("user" in session)) {
+        throw new Error("Invalid session");
+      }
+      const storedUser = session.user as Partial<AuthUser> | null;
+      if (!storedUser || typeof storedUser !== "object") {
+        throw new Error("Invalid session user");
+      }
+      const nextProfile = {
+        ...profile,
+        userId: profile.userId ?? storedUser.userId,
+      };
+      storage.setItem(
+        AUTH_STORAGE_KEY,
+        JSON.stringify({...session, user: nextProfile}),
+      );
+      setUser(nextProfile);
+    } catch {
+      throw new Error("Unable to update the stored profile");
+    }
   }, []);
 
   const value = useMemo<AuthContextValue>(

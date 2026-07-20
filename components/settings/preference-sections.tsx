@@ -7,25 +7,33 @@ import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from
 import {usePathname, useRouter} from "@/src/i18n/navigation";
 import type {AppLocale} from "@/src/i18n/routing";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import {SortDropdown} from "@/components/shared/sort-dropdown";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { SettingRow } from "./settings-card";
 
 function useStoredState<T>(key: string, initial: T) {
   const [value, setValue] = useState(initial);
+  const initialRef = useRef(initial);
   const hydrated = useRef(false);
   useEffect(() => {
     queueMicrotask(() => {
       try {
         const saved = localStorage.getItem(key);
-        if (saved) setValue(JSON.parse(saved) as T);
+        if (saved) {
+          const parsed: unknown = JSON.parse(saved);
+          if (typeof initialRef.current === "boolean") {
+            if (typeof parsed === "boolean") setValue(parsed as T);
+          } else if (
+            parsed &&
+            typeof parsed === "object" &&
+            !Array.isArray(parsed) &&
+            initialRef.current &&
+            typeof initialRef.current === "object"
+          ) {
+            setValue({...initialRef.current, ...parsed});
+          }
+        }
       } catch {
         /* use defaults */
       } finally {
@@ -184,22 +192,20 @@ export function AppearanceSettings() {
         label={languageT("label")}
         description={t("languageDescription")}
       >
-        <Select
+        <SortDropdown
           value={locale}
           disabled={isChangingLanguage}
+          label={languageT("switchLabel")}
+          className="w-40"
+          options={[
+            {value: "en", label: languageT("english"), lang: "en", dir: "ltr"},
+            {value: "ar", label: languageT("arabic"), lang: "ar", dir: "rtl"},
+          ]}
           onValueChange={(language) => {
-            if (!language || language === locale) return;
+            if (language === locale) return;
             startLanguageTransition(() => router.replace(pathname, {locale: language as AppLocale}));
           }}
-        >
-          <SelectTrigger aria-label={languageT("switchLabel")} className="w-40">
-            <SelectValue>{locale === "ar" ? languageT("arabic") : languageT("english")}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="en"><span lang="en" dir="ltr">{languageT("english")}</span></SelectItem>
-            <SelectItem value="ar"><span lang="ar" dir="rtl">{languageT("arabic")}</span></SelectItem>
-          </SelectContent>
-        </Select>
+        />
       </SettingRow>
     </div>
   );

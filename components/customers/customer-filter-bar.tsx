@@ -4,13 +4,7 @@ import type { CustomerStatus } from "@/data/customers";
 import type { CustomerSortSelectValue } from "@/components/customers/use-customer-directory";
 import {useTranslations} from "next-intl";
 import { SearchInput } from "@/components/shared/search-input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import {SortDropdown} from "@/components/shared/sort-dropdown";
 
 export type CustomerFilterBarProps = {
   search: string;
@@ -47,72 +41,47 @@ export function CustomerFilterBar({
         containerClassName="sm:max-w-none lg:max-w-md lg:flex-1"
       />
       <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-        <Select
+        <SortDropdown
           value={status}
+          label={t("status")}
+          className="w-full sm:w-32"
+          options={[
+            {value: "all", label: t("allStatuses")},
+            {value: "active", label: statusT("active")},
+            {value: "inactive", label: statusT("inactive")},
+            {value: "lead", label: statusT("lead")},
+          ]}
           onValueChange={(value) =>
-            onStatusChange((value ?? "all") as CustomerStatus | "all")
+            onStatusChange(value as CustomerStatus | "all")
           }
-        >
-          <SelectTrigger
-            className="w-full sm:w-32"
-            aria-label={t("status")}
-          >
-            <SelectValue>
-              {status === "all" ? t("allStatuses") : statusT(status)}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("allStatuses")}</SelectItem>
-            <SelectItem value="active">{statusT("active")}</SelectItem>
-            <SelectItem value="inactive">{statusT("inactive")}</SelectItem>
-            <SelectItem value="lead">{statusT("lead")}</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select
+        />
+        <SortDropdown
           value={company}
-          onValueChange={(value) => onCompanyChange(value ?? "all")}
-        >
-          <SelectTrigger
-            className="w-full sm:w-44"
-            aria-label={t("company")}
-          >
-            <SelectValue>{company === "all" ? t("allCompanies") : company}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("allCompanies")}</SelectItem>
-            {companies.map((item) => (
-              <SelectItem key={item} value={item}>
-                {item}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select
+          label={t("company")}
+          className="w-full sm:w-44"
+          options={[
+            {value: "all", label: t("allCompanies")},
+            ...companies.map((item) => ({value: item, label: item})),
+          ]}
+          onValueChange={onCompanyChange}
+        />
+        <SortDropdown
           value={sort}
+          label={t("sortCustomers")}
+          className="col-span-2 w-full sm:w-36"
+          options={[
+            ...(sort === "custom"
+              ? [{value: "custom", label: t("customSort"), disabled: true}]
+              : []),
+            {value: "newest", label: t("newest")},
+            {value: "oldest", label: t("oldest")},
+            {value: "name-asc", label: t("nameAZ")},
+            {value: "name-desc", label: t("nameZA")},
+          ]}
           onValueChange={(value) =>
-            onSortChange((value ?? "newest") as CustomerSortSelectValue)
+            onSortChange(value as CustomerSortSelectValue)
           }
-        >
-          <SelectTrigger
-            className="col-span-2 w-full sm:w-36"
-            aria-label={t("sortCustomers")}
-          >
-            <SelectValue>
-              {sort === "newest" ? t("newest") : sort === "oldest" ? t("oldest") : sort === "name-asc" ? t("nameAZ") : sort === "name-desc" ? t("nameZA") : t("customSort")}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {sort === "custom" ? (
-              <SelectItem value="custom" disabled>
-                {t("customSort")}
-              </SelectItem>
-            ) : null}
-            <SelectItem value="newest">{t("newest")}</SelectItem>
-            <SelectItem value="oldest">{t("oldest")}</SelectItem>
-            <SelectItem value="name-asc">{t("nameAZ")}</SelectItem>
-            <SelectItem value="name-desc">{t("nameZA")}</SelectItem>
-          </SelectContent>
-        </Select>
+        />
       </div>
     </div>
   );

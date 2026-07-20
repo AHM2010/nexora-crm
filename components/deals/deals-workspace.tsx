@@ -30,6 +30,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { SearchInput } from "@/components/shared/search-input";
 import { StatCard } from "@/components/shared/stat-card";
+import {SortDropdown} from "@/components/shared/sort-dropdown";
 import {
   Dialog,
   DialogContent,
@@ -38,13 +39,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { readStoredDeals, storeDeals } from "@/lib/deals-storage";
 import {useFormatter, useTranslations} from "next-intl";
 
@@ -63,12 +57,13 @@ const currency = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-function reorderDeals(deals: Deal[], activeId: string, overId: string) {
+export function reorderDeals(deals: Deal[], activeId: string, overId: string) {
   const activeIndex = deals.findIndex((deal) => deal.id === activeId);
   if (activeIndex < 0 || activeId === overId) return deals;
 
   const activeDeal = deals[activeIndex];
-  const overDeal = deals.find((deal) => deal.id === overId);
+  const overIndex = deals.findIndex((deal) => deal.id === overId);
+  const overDeal = overIndex >= 0 ? deals[overIndex] : undefined;
   const columnStage = overId.startsWith("column-")
     ? overId.slice("column-".length)
     : null;
@@ -79,7 +74,6 @@ function reorderDeals(deals: Deal[], activeId: string, overId: string) {
   const next = [...deals];
   next.splice(activeIndex, 1);
 
-  const overIndex = next.findIndex((deal) => deal.id === overId);
   const insertionIndex =
     overIndex >= 0
       ? overIndex
@@ -242,65 +236,40 @@ export function DealsWorkspace({ initialDeals }: { initialDeals: Deal[] }) {
           containerClassName="sm:max-w-none lg:max-w-md lg:flex-1"
         />
         <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-          <Select
+          <SortDropdown
             value={stage}
-            onValueChange={(value) =>
-              setStage((value ?? "all") as DealStage | "all")
-            }
-          >
-            <SelectTrigger
-              className="w-full sm:w-36"
-              aria-label={filtersT("stage")}
-            >
-              <SelectValue>{stage === "all" ? filtersT("allStages") : statusT(stage)}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{filtersT("allStages")}</SelectItem>
-              {dealStages.map((item) => (
-                <SelectItem key={item} value={item}>
-                  {statusT(item)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
+            label={filtersT("stage")}
+            className="w-full sm:w-36"
+            options={[
+              {value: "all", label: filtersT("allStages")},
+              ...dealStages.map((item) => ({value: item, label: statusT(item)})),
+            ]}
+            onValueChange={(value) => setStage(value as DealStage | "all")}
+          />
+          <SortDropdown
             value={priority}
-            onValueChange={(value) =>
-              setPriority((value ?? "all") as DealPriority | "all")
-            }
-          >
-            <SelectTrigger
-              className="w-full sm:w-36"
-              aria-label={filtersT("priority")}
-            >
-              <SelectValue>{priority === "all" ? filtersT("allPriorities") : filtersT(priority)}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{filtersT("allPriorities")}</SelectItem>
-              <SelectItem value="low">{filtersT("low")}</SelectItem>
-              <SelectItem value="medium">{filtersT("medium")}</SelectItem>
-              <SelectItem value="high">{filtersT("high")}</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select
+            label={filtersT("priority")}
+            className="w-full sm:w-36"
+            options={[
+              {value: "all", label: filtersT("allPriorities")},
+              {value: "low", label: filtersT("low")},
+              {value: "medium", label: filtersT("medium")},
+              {value: "high", label: filtersT("high")},
+            ]}
+            onValueChange={(value) => setPriority(value as DealPriority | "all")}
+          />
+          <SortDropdown
             value={sort}
-            onValueChange={(value) =>
-              setSort((value ?? "manual") as SortOption)
-            }
-          >
-            <SelectTrigger
-              className="col-span-2 w-full sm:w-44"
-              aria-label={filtersT("sortDeals")}
-            >
-              <SelectValue>{sort === "manual" ? filtersT("manual") : sort === "closingDate" ? filtersT("closingDate") : sort === "value" ? filtersT("dealValue") : filtersT("customerName")}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="manual">{filtersT("manual")}</SelectItem>
-              <SelectItem value="closingDate">{filtersT("closingDate")}</SelectItem>
-              <SelectItem value="value">{filtersT("dealValue")}</SelectItem>
-              <SelectItem value="customerName">{filtersT("customerName")}</SelectItem>
-            </SelectContent>
-          </Select>
+            label={filtersT("sortDeals")}
+            className="col-span-2 w-full sm:w-44"
+            options={[
+              {value: "manual", label: filtersT("manual")},
+              {value: "closingDate", label: filtersT("closingDate")},
+              {value: "value", label: filtersT("dealValue")},
+              {value: "customerName", label: filtersT("customerName")},
+            ]}
+            onValueChange={(value) => setSort(value as SortOption)}
+          />
         </div>
       </section>
 

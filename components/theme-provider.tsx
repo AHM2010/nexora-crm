@@ -66,8 +66,12 @@ export function ThemeProvider({
     theme,
     resolvedTheme,
     setTheme(next) {
-      localStorage.setItem(STORAGE_KEY, next);
-      document.cookie = `${THEME_COOKIE}=${next}; path=/; max-age=31536000; SameSite=Lax`;
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+        document.cookie = `${THEME_COOKIE}=${next}; path=/; max-age=31536000; SameSite=Lax`;
+      } catch {
+        // The theme still applies for this session when persistence is blocked.
+      }
       setThemeState(next);
     },
   }), [resolvedTheme, theme]);

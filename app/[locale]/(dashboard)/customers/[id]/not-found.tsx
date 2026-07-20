@@ -10,7 +10,9 @@ export default function CustomerNotFound() {
       title="Customer not found"
       description="This customer ID does not match a record in your directory. The customer may have been removed or the link may be incorrect."
       action={
-        <Button render={<Link href="/customers" />}>Back to customers</Button>
+        <Button nativeButton={false} render={<Link href="/customers" />}>
+          Back to customers
+        </Button>
       }
     />
   );

@@ -37,9 +37,10 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
       <NavLinks onNavigate={onNavigate} />
 
       <div className="border-t border-sidebar-border p-4">
-        <button
-          type="button"
-          aria-label="Open user menu"
+        <Link
+          href="/settings"
+          onClick={onNavigate}
+          aria-label="Open account settings"
           className="flex w-full items-center gap-3 rounded-lg p-2 text-start outline-none transition-colors hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring"
         >
           <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-sidebar-primary/90 text-xs font-semibold text-sidebar-primary-foreground shadow-sm ring-1 ring-black/10">
@@ -57,7 +58,7 @@ export function SidebarContent({ onNavigate }: SidebarContentProps) {
             aria-hidden="true"
             className="size-4 text-sidebar-foreground/50"
           />
-        </button>
+        </Link>
       </div>
     </>
   );
