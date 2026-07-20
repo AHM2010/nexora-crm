@@ -210,13 +210,14 @@ export function SecuritySettings({
 }: {
   notify: (kind: "success" | "error", message: string) => void;
 }) {
+  const t = useTranslations("Settings");
   const [twoFactor, setTwoFactor] = useStoredState("nexora-two-factor", false);
   return (
     <div className="divide-y">
       <SettingRow label="Password" description="Last changed 3 months ago.">
         <Button
           variant="outline"
-          onClick={() => notify("success", "Password flow opened (demo).")}
+          onClick={() => notify("success", t("passwordFlowOpened"))}
         >
           Change password
         </Button>
@@ -253,7 +254,7 @@ export function SecuritySettings({
           variant="destructive"
           className="mt-4"
           onClick={() =>
-            notify("success", "Other devices have been signed out.")
+            notify("success", t("devicesSignedOut"))
           }
         >
           Sign out other devices

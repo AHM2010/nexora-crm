@@ -83,7 +83,16 @@
     "revenueLabel": "الإيرادات",
     "due": "موعد الاستحقاق",
     "activityLabel": "أنشطة العملاء الأخيرة",
-    "upcomingLabel": "المهام القادمة"
+    "upcomingLabel": "المهام القادمة",
+    "noActivity": "لا توجد أنشطة حديثة",
+    "noActivityDescription": "ستظهر تحديثات العملاء وإجراءات الفريق هنا.",
+    "activities": {
+      "movedToNegotiation": "نقل شركة Acme Corp إلى مرحلة التفاوض",
+      "completedDiscoveryCall": "أكمل مكالمة استكشافية",
+      "repliedToProposal": "رد على رسالة البريد الإلكتروني الخاصة بالعرض",
+      "createdFollowUpTask": "أنشأ مهمة متابعة",
+      "wonRenewalDeal": "فاز بصفقة تجديد Northstar"
+    }
   },
   "Crm": {
     "customersTitle": "العملاء",
@@ -102,6 +111,11 @@
     "clearFilters": "مسح عوامل التصفية",
     "customerReady": "إضافة العملاء جاهزة للربط بخادمك.",
     "customerRemoved": "تمت إزالة {name} من هذا العرض التجريبي.",
+    "customerEditing": "تعديل بيانات {name} إجراء تجريبي.",
+    "actionsFor": "إجراءات {name}",
+    "view": "عرض",
+    "edit": "تعديل",
+    "delete": "حذف",
     "tasksTitle": "المهام",
     "tasksDescription": "تتبّع التكليفات والمواعيد النهائية والتقدم في علاقات العملاء.",
     "taskSummary": "ملخص المهام",
@@ -233,7 +247,9 @@
     "changePassword": "تغيير كلمة المرور",
     "twoFactor": "المصادقة الثنائية",
     "signOutDevices": "تسجيل خروج الأجهزة الأخرى",
-    "active": "نشط"
+    "active": "نشط",
+    "passwordFlowOpened": "تم فتح خطوات تغيير كلمة المرور (عرض تجريبي).",
+    "devicesSignedOut": "تم تسجيل خروج الأجهزة الأخرى."
   },
   "Table": {
     "directory": "دليل العملاء",

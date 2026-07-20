@@ -6,6 +6,7 @@ import { CustomerActionsDropdown } from "@/components/customers/customer-actions
 import { CustomerAvatar } from "@/components/customers/customer-avatar";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { TableCell, TableRow } from "@/components/ui/table";
+import {useTranslations} from "next-intl";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -23,6 +24,7 @@ export function CustomerRow({
   onDelete: (customer: Customer) => void;
 }) {
   const router = useRouter();
+  const t = useTranslations("Crm");
 
   return (
     <TableRow className="odd:bg-muted/20 transition-[background-color,opacity] duration-150 hover:bg-muted/55 motion-reduce:transition-none">
@@ -68,7 +70,7 @@ export function CustomerRow({
         <CustomerActionsDropdown
           customer={customer}
           onView={() => router.push(`/customers/${customer.id}`)}
-          onEdit={() => onAction(`Editing ${customer.name} is a demo action.`)}
+          onEdit={() => onAction(t("customerEditing", {name: customer.name}))}
           onDelete={() => onDelete(customer)}
         />
       </TableCell>

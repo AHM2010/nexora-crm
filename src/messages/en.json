@@ -83,7 +83,16 @@
     "revenueLabel": "Revenue",
     "due": "Due",
     "activityLabel": "Recent customer activities",
-    "upcomingLabel": "Upcoming tasks"
+    "upcomingLabel": "Upcoming tasks",
+    "noActivity": "No recent activity",
+    "noActivityDescription": "Customer updates and team actions will appear here.",
+    "activities": {
+      "movedToNegotiation": "moved Acme Corp to Negotiation",
+      "completedDiscoveryCall": "completed a discovery call",
+      "repliedToProposal": "replied to the proposal email",
+      "createdFollowUpTask": "created a follow-up task",
+      "wonRenewalDeal": "won the Northstar renewal deal"
+    }
   },
   "Crm": {
     "customersTitle": "Customers",
@@ -102,6 +111,11 @@
     "clearFilters": "Clear filters",
     "customerReady": "Customer creation is ready to connect to your backend.",
     "customerRemoved": "{name} was removed from this demo.",
+    "customerEditing": "Editing {name} is a demo action.",
+    "actionsFor": "Actions for {name}",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
     "tasksTitle": "Tasks",
     "tasksDescription": "Track assignments, deadlines, and progress across your customer relationships.",
     "taskSummary": "Task summary",
@@ -233,7 +247,9 @@
     "changePassword": "Change password",
     "twoFactor": "Two-factor authentication",
     "signOutDevices": "Sign out other devices",
-    "active": "Active"
+    "active": "Active",
+    "passwordFlowOpened": "Password flow opened (demo).",
+    "devicesSignedOut": "Other devices have been signed out."
   },
   "Table": {
     "directory": "Customer directory",

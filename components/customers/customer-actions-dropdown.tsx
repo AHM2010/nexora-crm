@@ -5,6 +5,7 @@ import {
   createStandardRowActions,
   RowActionsMenu,
 } from "@/components/shared/row-actions-menu";
+import {useTranslations} from "next-intl";
 
 export function CustomerActionsDropdown({
   customer,
@@ -17,10 +18,14 @@ export function CustomerActionsDropdown({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const t = useTranslations("Crm");
   return (
     <RowActionsMenu
-      label={`Actions for ${customer.name}`}
-      actions={createStandardRowActions({ onView, onEdit, onDelete })}
+      label={t("actionsFor", {name: customer.name})}
+      actions={createStandardRowActions(
+        {onView, onEdit, onDelete},
+        {view: t("view"), edit: t("edit"), delete: t("delete")},
+      )}
     />
   );
 }

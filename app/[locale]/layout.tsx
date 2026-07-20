@@ -4,7 +4,6 @@ import {setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 import {cookies} from "next/headers";
 import {Geist, Geist_Mono} from "next/font/google";
-import Script from "next/script";
 import {AuthProvider} from "@/components/auth/auth-provider";
 import {ThemeProvider} from "@/components/theme-provider";
 import {TooltipProvider} from "@/components/ui/tooltip";
@@ -39,9 +38,6 @@ export default async function LocaleLayout({children, params}: LayoutProps<"/[lo
   return (
     <html lang={locale} dir={getDirection(locale)} data-scroll-behavior="smooth" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} ${initialResolvedTheme === "dark" ? "dark" : ""} h-full antialiased`} style={{colorScheme: initialResolvedTheme, backgroundColor: initialResolvedTheme === "dark" ? "#0a0a0a" : "#ffffff"}}>
       <body className="min-h-full bg-background text-foreground">
-        <Script id="theme-initializer" strategy="beforeInteractive">
-          {`(function(){try{var t=localStorage.getItem('theme')||'system';var d=t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);document.documentElement.style.colorScheme=d?'dark':'light';document.cookie='nexora_theme='+t+'; path=/; max-age=31536000; SameSite=Lax';document.cookie='nexora_resolved_theme='+(d?'dark':'light')+'; path=/; max-age=31536000; SameSite=Lax'}catch(e){}})();`}
-        </Script>
         <NextIntlClientProvider>
           <ThemeProvider initialTheme={initialTheme} initialResolvedTheme={initialResolvedTheme}>
             <AuthProvider>

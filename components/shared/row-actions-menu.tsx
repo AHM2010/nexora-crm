@@ -8,12 +8,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 export type RowActionItem = { label: string; onSelect: () => void; icon?: LucideIcon; disabled?: boolean; destructive?: boolean };
 export type RowActionsMenuProps = { actions: RowActionItem[]; label?: string; align?: "start" | "center" | "end" };
 export type StandardRowActionHandlers = { onView?: () => void; onEdit?: () => void; onDelete?: () => void };
+export type StandardRowActionLabels = {view: string; edit: string; delete: string};
 
-export function createStandardRowActions({ onView, onEdit, onDelete }: StandardRowActionHandlers): RowActionItem[] {
+export function createStandardRowActions(
+  {onView, onEdit, onDelete}: StandardRowActionHandlers,
+  labels: StandardRowActionLabels = {view: "View", edit: "Edit", delete: "Delete"},
+): RowActionItem[] {
   return [
-    ...(onView ? [{ label: "View", icon: Eye, onSelect: onView }] : []),
-    ...(onEdit ? [{ label: "Edit", icon: Pencil, onSelect: onEdit }] : []),
-    ...(onDelete ? [{ label: "Delete", icon: Trash2, onSelect: onDelete, destructive: true }] : []),
+    ...(onView ? [{label: labels.view, icon: Eye, onSelect: onView}] : []),
+    ...(onEdit ? [{label: labels.edit, icon: Pencil, onSelect: onEdit}] : []),
+    ...(onDelete ? [{label: labels.delete, icon: Trash2, onSelect: onDelete, destructive: true}] : []),
   ];
 }
 

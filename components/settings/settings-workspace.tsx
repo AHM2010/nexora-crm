@@ -14,7 +14,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useCallback, useState } from "react";
-import {useTranslations} from "next-intl";
+import {useLocale, useTranslations} from "next-intl";
 import { useAuth } from "@/components/auth/auth-provider";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
@@ -70,6 +70,8 @@ function AccountInformation() {
 export function SettingsWorkspace() {
   const t = useTranslations("Settings");
   const crmT = useTranslations("Crm");
+  const locale = useLocale();
+  const toastOffset = locale === "ar" ? -24 : 24;
   const [toasts, setToasts] = useState<Toast[]>([]);
   const notify = useCallback((kind: Toast["kind"], message: string) => {
     const id = Date.now();
@@ -169,24 +171,25 @@ export function SettingsWorkspace() {
           {toasts.map((toast) => (
             <motion.div
               key={toast.id}
-              initial={{ opacity: 0, x: 24, scale: 0.98 }}
+              initial={{ opacity: 0, x: toastOffset, scale: 0.98 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 24 }}
+              exit={{ opacity: 0, x: toastOffset }}
               className={cn(
-                "pointer-events-auto flex items-center gap-3 rounded-xl border bg-popover p-4 text-popover-foreground shadow-lg",
+                "pointer-events-auto flex items-center gap-3 rounded-xl border bg-popover p-4 text-start text-popover-foreground shadow-lg",
                 toast.kind === "error" && "border-destructive/40",
               )}
               role={toast.kind === "error" ? "alert" : "status"}
             >
               {toast.kind === "success" ? (
-                <CheckCircle2 className="size-5 text-success" />
+                <CheckCircle2 className="size-5 shrink-0 text-success" />
               ) : (
-                <XCircle className="size-5 text-destructive" />
+                <XCircle className="size-5 shrink-0 text-destructive" />
               )}
               <p className="flex-1 text-sm font-medium">{toast.message}</p>
               <Button
                 variant="ghost"
                 size="icon-sm"
+                className="shrink-0"
                 aria-label={crmT("dismiss")}
                 onClick={() =>
                   setToasts((items) =>

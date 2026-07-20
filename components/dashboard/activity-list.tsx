@@ -8,7 +8,7 @@ import {
 import { EmptyState } from "@/components/shared/empty-state";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import type { Activity, ActivityKind } from "@/data/activities";
-import {useTranslations} from "next-intl";
+import {useLocale, useTranslations} from "next-intl";
 
 const activityIcons = {
   deal: CircleDollarSign,
@@ -19,11 +19,13 @@ const activityIcons = {
 
 export function ActivityList({ activities }: { activities: Activity[] }) {
   const t = useTranslations("Dashboard");
+  const locale = useLocale();
+  const relativeTime = new Intl.RelativeTimeFormat(locale, {numeric: "always"});
   if (!activities.length)
     return (
       <EmptyState
-        title="No recent activity"
-        description="Customer updates and team actions will appear here."
+        title={t("noActivity")}
+        description={t("noActivityDescription")}
         icon={MessagesSquare}
       />
     );
@@ -49,11 +51,11 @@ export function ActivityList({ activities }: { activities: Activity[] }) {
               <p className="text-sm leading-5">
                 <span className="font-medium">{activity.customerName}</span>{" "}
                 <span className="text-muted-foreground">
-                  {activity.description}
+                  {t(`activities.${activity.descriptionKey}`)}
                 </span>
               </p>
               <time className="mt-1 block text-xs text-muted-foreground">
-                {activity.timestamp}
+                {relativeTime.format(activity.timeAgo.value, activity.timeAgo.unit)}
               </time>
             </div>
             <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors group-hover:bg-card group-hover:text-foreground">
