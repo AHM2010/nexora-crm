@@ -77,7 +77,7 @@ export function Navbar({ isMobileMenuOpen, onMobileMenuToggle }: NavbarProps) {
         <div className="relative">
           <Search
             aria-hidden="true"
-            className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            className="absolute inset-s-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
           />
           <input
             id="dashboard-search"
@@ -99,7 +99,7 @@ export function Navbar({ isMobileMenuOpen, onMobileMenuToggle }: NavbarProps) {
           <Bell aria-hidden="true" className="size-4" />
           <span
             aria-hidden="true"
-            className="absolute end-2 top-2 size-1.5 rounded-full bg-accent"
+            className="absolute inset-e-2 top-2 size-1.5 rounded-full bg-accent"
           />
         </button>
         <button
